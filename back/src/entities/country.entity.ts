@@ -1,10 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from "typeorm";
-import { City } from "./city.entities";
-import { User } from "./user.entity";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { City } from './city.entity';
+import { User } from './user.entity';
 
-@Entity("pais")
+@Entity('pais')
 export class Country {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id_pais: string;
 
   @Column({ length: 100 })
@@ -22,9 +29,8 @@ export class Country {
   @Column({ length: 10 })
   acronimo: string;
 
-  
   @ManyToOne(() => User)
-  @JoinColumn({ name: "id_usuario" })
+  @JoinColumn({ name: 'id_usuario' })
   user: User;
 
   @OneToMany(() => City, (c) => c.country)

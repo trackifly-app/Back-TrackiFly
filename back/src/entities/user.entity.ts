@@ -6,9 +6,9 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
-import { Role } from "./roles.entities";
-import { PaymentMethod } from "./paymentMethod.entities";
-import { Order } from "./order.entities";
+import { Role } from "./roles.entity";
+import { PaymentMethod } from "./paymentMethod.entity";
+import { Order } from "./order.entity";
 
 @Entity("usuarios")
 export class User {
@@ -32,16 +32,16 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ length: 20, nullable: true })
-  telefono: string | null;
+ @Column({ type: "varchar", length: 20, nullable: true })
+telefono: string | null;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   imagen: string | null;
 
   @Column({ type: "date", nullable: true })
   fecha_de_nacimiento: string | null;
 
-  @Column({ length: 50 })
+  @Column({ type: "varchar", length: 50 })
   estado: string;
 
   @Column({ default: true })
@@ -59,7 +59,7 @@ export class User {
   @Column({ type: "timestamp", nullable: true })
   ultimo_login_fecha: Date | null;
 
-  @Column({ length: 50 })
+  @Column({ type: "varchar", length: 50 })
   estado_de_la_cuenta: string;
 
   @Column({ default: false })

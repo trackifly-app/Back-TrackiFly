@@ -10,13 +10,18 @@ const config = {
   port: environment.DB_PORT as unknown as number,
   username: environment.DB_USERNAME,
   password: environment.DB_PASSWORD,
-  entities: ['dist/**/*.entity{.ts,.js}'],
+  //entities: ['dist/**/*.entity{.ts,.js}'],
+  entities: [__dirname + '/../entities/*.entity.{ts,js}', 'dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   autoLoadEntities: true,
   logging: false,
   synchronize: true,
   dropSchema: false,
 };
+
+// ...código anterior...
+
+console.log('TypeORM config:', config); // <-- Agrega esta línea aquí
 
 export const typeOrmConfig = registerAs('typeorm', () => config);
 // La línea siguiente es necesaria para poder correr las migraciones
