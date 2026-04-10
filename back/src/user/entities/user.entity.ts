@@ -6,9 +6,9 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
-import { Role } from "./roles.entity";
-import { PaymentMethod } from "./paymentMethod.entity";
-import { Order } from "./order.entity";
+import { Role } from "../../entity/roles.entity";
+import { PaymentMethod } from "../..//entity/paymentMethod.entity";
+import { Order } from "../..//entity/order.entity";
 
 @Entity("usuarios")
 export class User {
@@ -32,7 +32,7 @@ export class User {
   @Column()
   password: string;
 
- @Column({ type: "varchar", length: 20, nullable: true })
+@Column({ type: "varchar", length: 20, nullable: true })
 telefono: string | null;
 
   @Column({ type: "varchar", length: 255, nullable: true })

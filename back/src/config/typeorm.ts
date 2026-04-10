@@ -19,7 +19,7 @@ const config = {
   dropSchema: false,
 };
 
-// ...código anterior...
+
 
 console.log('TypeORM config:', config); // <-- Agrega esta línea aquí
 

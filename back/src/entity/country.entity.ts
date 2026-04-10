@@ -7,7 +7,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { City } from './city.entity';
-import { User } from './user.entity';
+import { User } from '../user/entities/user.entity'
+
 
 @Entity('pais')
 export class Country {

@@ -8,6 +8,8 @@ import {
   IsUUID,
   Length,
   MinLength,
+  IsEmpty,
+  IsNotEmpty,
 } from 'class-validator';
 
 /**
@@ -20,27 +22,30 @@ export class CreateUserDto {
   @Length(1, 100)
   nombre: string;
 
-  @IsOptional()
+ //@IsEmpty()
   /** UUID del rol asociado al usuario */
   @IsUUID()
   id_rol: string;
 
+  //@IsNotEmpty()
   @IsOptional()
   /** UUID de la forma de pago asociada */
   @IsUUID()
   id_forma_de_pago: string;
 
+  //@IsNotEmpty()
   /** Correo electrónico del usuario */
   @IsEmail()
   correo: string;
 
+  //@IsNotEmpty()
   /** Contraseña del usuario (mínimo 6 caracteres) */
   @IsString()
   @MinLength(6)
   password: string;
 
   /** Teléfono del usuario (opcional) */
-  @IsOptional()
+  //@IsNotEmpty()
   @IsString()
   @Length(0, 20)
   telefono?: string;
@@ -51,14 +56,10 @@ export class CreateUserDto {
   imagen?: string;
 
   /** Fecha de nacimiento (opcional, formato ISO) */
-  @IsOptional()
+  //@IsNotEmpty()
   @IsDateString()
   fecha_de_nacimiento?: string;
 
-  /** Estado del usuario (ej: activo, inactivo) */
-  @IsString()
-  @Length(1, 50)
-  estado: string;
 
   /** Si el usuario acepta notificaciones (opcional) */
   @IsOptional()
@@ -71,27 +72,18 @@ export class CreateUserDto {
   activo?: boolean;
 
   /** Fecha de la última sesión (opcional) */
-  @IsOptional()
-  @IsDateString()
-  ultima_sesion?: Date;
+ // @IsOptional()
+ // @IsDateString()
+ // ultima_sesion?: Date;
 
-  /** Fecha del último login (opcional) */
-  @IsOptional()
-  @IsDateString()
-  ultimo_login?: Date;
-
-  /** Fecha del último login (opcional, redundante) */
-  @IsOptional()
-  @IsDateString()
-  ultimo_login_fecha?: Date;
 
   /** Estado de la cuenta (ej: verificada, suspendida) */
-  @IsString()
-  @Length(1, 50)
-  estado_de_la_cuenta: string;
+ // @IsString()
+ // @Length(1, 50)
+ // estado_de_la_cuenta: string;
 
-  /** Si el email está verificado (opcional) */
-  @IsOptional()
-  @IsBoolean()
-  verificacion_email?: boolean;
+  ///** Si el email está verificado (opcional) */
+  //@IsOptional()
+  //@IsBoolean()
+  //verificacion_email?: boolean;
 }
