@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Gender } from '../../common/gender.enum';
+import { Role } from './roles.entity';
 
 @Entity({ name: 'USERS' })
 export class Users {
@@ -29,4 +30,8 @@ export class Users {
 
   @Column({ type: 'varchar', length: 80, nullable: false })
   country: string;
+
+  @ManyToOne(() => Role, (role) => role.users, { nullable: false })
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 }
