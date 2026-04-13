@@ -62,6 +62,7 @@ export class RegisterUserDto {
     { message: 'La fecha de nacimiento debe tener formato ISO' },
   )
   birthdate: string;
+
   @IsNotEmpty({ message: 'El país no puede estar vacío' })
   @IsString({ message: 'El país debe ser una cadena de texto' })
   @MinLength(2, { message: 'El país debe tener al menos 2 caracteres' })

@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { typeOrmConfig } from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
+import { UsersModule } from './user/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { environment } from './config/environment';
@@ -20,7 +20,7 @@ import { environment } from './config/environment';
       useFactory: (configService: ConfigService) =>
         configService.get('typeorm')!,
     }),
-    UserModule,
+    UsersModule,
     AuthModule,
     JwtModule.register({
       global: true,
