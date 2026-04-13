@@ -32,8 +32,8 @@ export class User {
   @Column()
   password: string;
 
-@Column({ type: "varchar", length: 20, nullable: true })
-telefono: string | null;
+  @Column({ type: "varchar", length: 20, nullable: true })
+  telefono: string | null;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   imagen: string | null;
