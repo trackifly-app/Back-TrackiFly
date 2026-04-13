@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -9,6 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Gender } from '../../common/gender.enum';
 
 export class RegisterUserDto {
   @IsNotEmpty({ message: 'El nombre no puede estar vacío' })
@@ -45,10 +47,8 @@ export class RegisterUserDto {
   phone: number;
 
   @IsNotEmpty({ message: 'El género no puede estar vacío' })
-  @IsString({ message: 'El género debe ser una cadena de texto' })
-  @MinLength(1, { message: 'El género debe tener al menos 1 caracter' })
-  @MaxLength(20, { message: 'El género no puede tener más de 20 caracteres' })
-  gender: string;
+  @IsEnum(Gender, { message: 'El género debe ser un valor válido' })
+  gender: Gender;
 
   @IsNotEmpty({ message: 'La fecha de nacimiento no puede estar vacía' })
   @IsDateString({}, { message: 'La fecha de nacimiento debe tener formato ISO' })
