@@ -6,6 +6,8 @@ import { typeOrmConfig } from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+import { environment } from './config/environment';
 
 @Module({
   imports: [
@@ -20,6 +22,13 @@ import { AuthModule } from './auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    JwtModule.register({
+      global: true,
+      secret: environment.JWT_SECRET,
+      signOptions: {
+        expiresIn: '60m',
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
