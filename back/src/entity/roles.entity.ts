@@ -8,6 +8,5 @@ export class Role {
   @Column({ length: 50 })
   nombre: string;
 
-  @Column({ length: 50 })
-  slug: string;
+
 }
