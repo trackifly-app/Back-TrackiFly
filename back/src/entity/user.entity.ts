@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
-import { Role } from "../../entity/roles.entity";
+import { Role } from "./roles.entity";
 import { PaymentMethod } from "./paymentMethod.entity";
 import { Order } from "./order.entity";
 
