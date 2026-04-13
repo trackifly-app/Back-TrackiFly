@@ -1,70 +1,32 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from "typeorm";
-import { Role } from "../../entity/roles.entity";
-import { PaymentMethod } from "../..//entity/paymentMethod.entity";
-import { Order } from "../..//entity/order.entity";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Gender } from '../../common/gender.enum';
 
-@Entity("usuarios")
-export class User {
-  @PrimaryGeneratedColumn("uuid")
-  id_usuario: string;
+@Entity({ name: 'USERS' })
+export class Users {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ length: 100 })
-  nombre: string;
+  @Column({ type: 'varchar', length: 80, nullable: false })
+  name: string;
 
-  @ManyToOne(() => Role)
-  @JoinColumn({ name: "id_rol" })
-  role: Role;
+  @Column({ type: 'varchar', length: 80, nullable: false, unique: true })
+  email: string;
 
-  @ManyToOne(() => PaymentMethod, (pm) => pm.users)
-  @JoinColumn({ name: "id_forma_de_pago" })
-  paymentMethod: PaymentMethod;
-
-  @Column({ length: 255 })
-  correo: string;
-
-  @Column()
+  @Column({ type: 'varchar', length: 100, nullable: false })
   password: string;
 
-@Column({ type: "varchar", length: 20, nullable: true })
-telefono: string | null;
+  @Column({ type: 'varchar', length: 150, nullable: false })
+  address: string;
 
-  @Column({ type: "varchar", length: 255, nullable: true })
-  imagen: string | null;
+  @Column({ type: 'bigint', nullable: false })
+  phone: number;
 
-  @Column({ type: "date", nullable: true })
-  fecha_de_nacimiento: string | null;
+  @Column({ type: 'enum', enum: Gender, nullable: false })
+  gender: Gender;
 
-  @Column({ type: "varchar", length: 50 })
-  estado: string;
+  @Column({ type: 'date', nullable: false })
+  birthdate: string;
 
-  @Column({ default: true })
-  notificaciones: boolean;
-
-  @Column({ default: true })
-  activo: boolean;
-
-  @Column({ type: "timestamp", nullable: true })
-  ultima_sesion: Date | null;
-
-  @Column({ type: "timestamp", nullable: true })
-  ultimo_login: Date | null;
-
-  @Column({ type: "timestamp", nullable: true })
-  ultimo_login_fecha: Date | null;
-
-  @Column({ type: "varchar", length: 50 })
-  estado_de_la_cuenta: string;
-
-  @Column({ default: false })
-  verificacion_email: boolean;
-
-  @OneToMany(() => Order, (o) => o.user)
-  orders: Order[];
+  @Column({ type: 'varchar', length: 80, nullable: false })
+  country: string;
 }
