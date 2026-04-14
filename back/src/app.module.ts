@@ -8,6 +8,7 @@ import { UsersModule } from './user/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { environment } from './config/environment';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { environment } from './config/environment';
         expiresIn: '60m',
       },
     }),
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
