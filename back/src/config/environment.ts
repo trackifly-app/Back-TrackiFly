@@ -12,4 +12,7 @@ export const environment = {
   DB_PASSWORD: process.env.DB_PASSWORD,
 
   JWT_SECRET: process.env.JWT_SECRET,
+  
+  SUPERADMIN_EMAIL: process.env.SUPERADMIN_EMAIL,
+  SUPERADMIN_PASSWORD: process.env.SUPERADMIN_PASSWORD,
 };

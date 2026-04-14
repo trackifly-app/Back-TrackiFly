@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Gender } from '../../common/gender.enum';
-import { Role } from './roles.entity';
+import { Roles } from '../../roles/entities/roles.entity';
+
 
 @Entity({ name: 'USERS' })
 export class Users {
@@ -31,7 +32,7 @@ export class Users {
   @Column({ type: 'varchar', length: 80, nullable: false })
   country: string;
 
-  @ManyToOne(() => Role, (role) => role.users, { nullable: false })
+  @ManyToOne(() => Roles, (role) => role.users, { nullable: false, eager: true  })
   @JoinColumn({ name: 'role_id' })
-  role: Role;
+  role: Roles;
 }
