@@ -68,8 +68,4 @@ export class RegisterUserDto {
   @MinLength(2, { message: 'El país debe tener al menos 2 caracteres' })
   @MaxLength(80, { message: 'El país no puede tener más de 80 caracteres' })
   country: string;
-
-  @IsOptional()
-  @IsUUID('4', { message: 'El rol debe ser un UUID válido' })
-  roleId: string;
 }
