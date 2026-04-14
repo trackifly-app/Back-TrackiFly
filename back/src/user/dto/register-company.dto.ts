@@ -1,7 +1,9 @@
 import {
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
+  IsUrl,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -36,4 +38,8 @@ export class RegisterCompanyDto extends RegisterBaseDto {
   @IsNotEmpty({ message: 'El plan no puede estar vacío' })
   @IsEnum(CompanyPlan, { message: 'El plan debe ser un valor válido' })
   plan: CompanyPlan;
+
+  @IsOptional()
+  @IsUrl({}, { message: 'La imagen debe ser una URL válida' })
+  image?: string;
 }
