@@ -7,8 +7,8 @@ export class Roles {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'enum', enum: Role, unique: true, length: 10, nullable: false })
-  name: string;
+  @Column({ type: 'enum', enum: Role, unique: true, nullable: false })
+  name: Role;
 
   @OneToMany(() => Users, (user) => user.role)
   users: Users[];

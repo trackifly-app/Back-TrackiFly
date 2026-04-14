@@ -34,7 +34,7 @@ import { RolesService } from './roles/roles.service';
     RolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RolesService],
+  providers: [AppService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor( private readonly rolesService: RolesService ) {}
