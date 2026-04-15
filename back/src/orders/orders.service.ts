@@ -13,31 +13,27 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const order = this.ordersRepository.create(createOrderDto);
-    return await this.ordersRepository.save(order);
+    return await this.ordersRepository.createOrder(createOrderDto);
   }
 
   async findAll(): Promise<Order[]> {
-    return await this.ordersRepository.find();
+    return await this.ordersRepository.findAllOrders();
   }
 
   async findOne(id: number): Promise<Order> {
-    const order = await this.ordersRepository.findOne({ where: { id } });
-    if (!order) throw new NotFoundException("Order not found");
+    const order = await this.ordersRepository.findOrderById(id);
+    if (!order) throw new NotFoundException('Order not found');
     return order;
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto): Promise<Order> {
-    const order = await this.ordersRepository.preload({
-      id,
-      ...updateOrderDto,
-    });
-    if (!order) throw new NotFoundException("Order not found");
-    return await this.ordersRepository.save(order);
+    const order = await this.ordersRepository.updateOrder(id, updateOrderDto);
+    if (!order) throw new NotFoundException('Order not found');
+    return order;
   }
 
   async remove(id: number): Promise<void> {
-    const result = await this.ordersRepository.delete(id);
-    if (result.affected === 0) throw new NotFoundException("Order not found");
+    const removed = await this.ordersRepository.removeOrder(id);
+    if (!removed) throw new NotFoundException('Order not found');
   }
 }
