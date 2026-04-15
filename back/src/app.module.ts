@@ -1,18 +1,24 @@
-import { MiddlewareConsumer, Module, NestModule, OnApplicationBootstrap } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { typeOrmConfig } from './config/typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { ProfilesModule } from './profiles/profiles.module';
-import { CompaniesModule } from './companies/companies.module';
-import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
-import { environment } from './config/environment';
-import { RolesModule } from './roles/roles.module';
-import { RolesService } from './roles/roles.service';
-import { LoggerMiddleware } from './middleware/logger.middleware';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  OnApplicationBootstrap,
+} from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { typeOrmConfig } from "./config/typeorm";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { UsersModule } from "./users/users.module";
+import { ProfilesModule } from "./profiles/profiles.module";
+import { CompaniesModule } from "./companies/companies.module";
+import { AuthModule } from "./auth/auth.module";
+import { JwtModule } from "@nestjs/jwt";
+import { environment } from "./config/environment";
+import { RolesModule } from "./roles/roles.module";
+import { RolesService } from "./roles/roles.service";
+import { LoggerMiddleware } from "./middleware/logger.middleware";
+import { OrdersModule } from "./orders/orders.module";
 
 @Module({
   imports: [
@@ -23,7 +29,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
-        configService.get('typeorm')!,
+        configService.get("typeorm")!,
     }),
     UsersModule,
     ProfilesModule,
@@ -33,10 +39,11 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: '60m',
+        expiresIn: "60m",
       },
     }),
     RolesModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -44,12 +51,12 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 export class AppModule implements NestModule, OnApplicationBootstrap {
   constructor(private readonly rolesService: RolesService) {}
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes("*");
   }
   async onApplicationBootstrap() {
     await this.rolesService.seedRoles();
-    console.log('Roles Cargados...');
+    console.log("Roles Cargados...");
     await this.rolesService.seedSuperAdmin();
-    console.log('Usuario Super administrador Cargado...');
+    console.log("Usuario Super administrador Cargado...");
   }
 }
