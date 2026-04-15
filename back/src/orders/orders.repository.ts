@@ -1,10 +1,14 @@
-import { EntityRepository, Repository } from "typeorm";
-import { Order } from "./entities/order.entity";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { UpdateOrderDto } from "./dto/update-order.dto";
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { Order } from './entities/order.entity';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
-@EntityRepository(Order)
+@Injectable()
 export class OrdersRepository extends Repository<Order> {
+  constructor(private dataSource: DataSource) {
+    super(Order, dataSource.createEntityManager());
+  }
   async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
     const order = this.create(createOrderDto);
     return await this.save(order);

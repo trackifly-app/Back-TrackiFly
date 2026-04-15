@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { OrderDetail } from "./order-detail.entity";
 
 @Entity("orders")
 export class Order {
@@ -11,5 +12,6 @@ export class Order {
   @Column("int")
   quantity: number;
 
-  // Puedes agregar más campos según necesidades futuras
+  @OneToMany(() => OrderDetail, (detail) => detail.order, { cascade: true })
+  details: OrderDetail[];
 }
