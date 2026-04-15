@@ -1,15 +1,18 @@
-import { Module, OnApplicationBootstrap } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { typeOrmConfig } from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './user/users.module';
+import { UsersModule } from './users/users.module';
+import { ProfilesModule } from './profiles/profiles.module';
+import { CompaniesModule } from './companies/companies.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { environment } from './config/environment';
 import { RolesModule } from './roles/roles.module';
 import { RolesService } from './roles/roles.service';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -23,6 +26,8 @@ import { RolesService } from './roles/roles.service';
         configService.get('typeorm')!,
     }),
     UsersModule,
+    ProfilesModule,
+    CompaniesModule,
     AuthModule,
     JwtModule.register({
       global: true,
@@ -36,13 +41,15 @@ import { RolesService } from './roles/roles.service';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements OnApplicationBootstrap {
-  constructor( private readonly rolesService: RolesService ) {}
-
+export class AppModule implements NestModule, OnApplicationBootstrap {
+  constructor(private readonly rolesService: RolesService) {}
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
   async onApplicationBootstrap() {
     await this.rolesService.seedRoles();
-    console.log('Roles Cargados...')
+    console.log('Roles Cargados...');
     await this.rolesService.seedSuperAdmin();
-    console.log('Usuario Super adminitrador Cargado...');
+    console.log('Usuario Super administrador Cargado...');
   }
 }

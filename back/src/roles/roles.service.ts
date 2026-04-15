@@ -1,12 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Roles } from './entities/roles.entity';
-import { Repository } from 'typeorm';
-import { Role } from '../common/roles.enum';
-import { Users } from '../user/entities/users.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { Role } from '../common/enums/role.enum';
+import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { environment } from '../config/environment';
-import { Gender } from '../common/gender.enum';
+import {
+  getSeedableRoles,
+  isSelfSignUpRole,
+} from './constants/role-catalog.constant';
 
 @Injectable()
 export class RolesService {
@@ -14,11 +17,30 @@ export class RolesService {
 
   constructor(
     @InjectRepository(Roles) private ormRolesRepository: Repository<Roles>,
-    @InjectRepository(Users) private ormUsersRepository: Repository<Users>,
+    @InjectRepository(User) private ormUsersRepository: Repository<User>,
   ) {}
 
+  async getRoleByName(
+    roleName: Role,
+    manager?: EntityManager,
+  ): Promise<Roles | null> {
+    if (manager) {
+      return manager.findOne(Roles, {
+        where: { name: roleName },
+      });
+    }
+
+    return this.ormRolesRepository.findOne({
+      where: { name: roleName },
+    });
+  }
+
+  isSelfSignUpAllowed(roleName: Role): boolean {
+    return isSelfSignUpRole(roleName);
+  }
+
   async seedRoles(): Promise<void> {
-    const rolesToSeed = [Role.User, Role.Admin, Role.SuperAdmin];
+    const rolesToSeed = getSeedableRoles();
 
     for (const roleName of rolesToSeed) {
       const existingRole = await this.ormRolesRepository.findOneBy({
@@ -57,7 +79,7 @@ export class RolesService {
 
     if (!email || !password) {
       this.logger.warn(
-        'Variables de entorno SUPERADMIN_EMAIL y SUPERADMIN_PASSWORD no configuradas. No se creará el SuperAdmin.',
+        'Variables de entorno SUPERADMIN_EMAIL y SUPERADMIN_PASSWORD no configuradas.',
       );
       return;
     }
@@ -65,22 +87,20 @@ export class RolesService {
     const existingUser = await this.ormUsersRepository.findOneBy({ email });
     if (existingUser) {
       this.logger.warn(
-        `El email ${email} ya está registrado. No se puede crear el SuperAdmin con ese email.`,
+        `El email ${email} ya está registrado. No se puede crear el SuperAdmin.`,
       );
       return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // SuperAdmin es solo identidad, sin perfil asociado
     const superAdmin = this.ormUsersRepository.create({
-      name: 'Super Admin',
       email,
       password: hashedPassword,
-      phone: 0,
-      country: 'System',
+      phone: '0000000000',
+      country: 'XX',
       address: 'System',
-      gender: Gender.Other,
-      birthdate: '1970-01-01',
       role: superAdminRole,
     });
 
