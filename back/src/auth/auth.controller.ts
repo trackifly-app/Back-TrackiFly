@@ -6,6 +6,7 @@ import { RegisterOperatorDto } from './dtos/register-operator.dto';
 import { LoginDto } from './dtos/login.dto';
 import { Role } from '../common/enums/role.enum';
 import { AuthGuard } from './guards/auth.guard';
+import { GoogleAuthDto } from './dtos/google-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -46,4 +47,8 @@ export class AuthController {
       user_id: id,
     };
   }
+  @Post('google')
+  async googleAuth(@Body() dto: GoogleAuthDto) {
+  return this.authService.googleSignIn(dto);
+}
 }
