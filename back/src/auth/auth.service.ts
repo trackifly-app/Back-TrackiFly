@@ -17,6 +17,8 @@ import * as bcrypt from 'bcrypt';
 import { ROLE_CATALOG } from '../roles/constants/role-catalog.constant';
 import { UserStatus } from '../common/enums/user-status.enum';
 import { RegisterOperatorDto } from './dtos/register-operator.dto';
+import { GoogleAuthDto } from './dtos/google-auth.dto';
+import { RegisterUserDto } from './dtos/register-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -163,4 +165,65 @@ export class AuthService {
       throw error;
     }
   }
+  async googleSignIn(dto: GoogleAuthDto) {
+  // Si el usuario ya existe, generamos token directamente
+  let user = await this.usersRepository.getUserByEmail(dto.email);
+
+  if (!user) {
+    // Usuario nuevo: lo creamos en una transacción
+    await this.dataSource.transaction(async (manager) => {
+      const role = await this.rolesService.getRoleByName(Role.User, manager);
+      if (!role) throw new BadRequestException('Rol no encontrado');
+
+      // Contraseña aleatoria porque Google maneja la auth
+      const randomPassword = await bcrypt.hash(
+        Math.random().toString(36),
+        10,
+      );
+
+      const newUser = manager.create(User, {
+        email: dto.email,
+        password: randomPassword,
+        role,
+        status: UserStatus.APPROVED, // Google ya validó el email
+      });
+      const savedUser = await manager.save(newUser);
+
+      const [first_name, ...rest] = dto.name.trim().split(' ');
+      const last_name = rest.join(' ') || '';
+
+      await this.profileFactory.createByRole(
+        Role.User,
+        {
+          email: dto.email,
+          password: randomPassword,
+          first_name,
+          last_name,
+          gender: null,
+          birthdate: null,
+          address: null,
+          phone: null,
+          country: null,
+        } as unknown as RegisterUserDto,
+        savedUser,
+        manager,
+      );
+
+      user = savedUser;
+    });
+  }
+
+  if (!user!.is_active) {
+    throw new BadRequestException('La cuenta se encuentra desactivada');
+  }
+
+  const payload = {
+    id: user!.id,
+    role: user!.role.name,
+    status: user!.status,
+  };
+
+  const token = this.jwtService.sign(payload);
+  return { message: 'Usuario autenticado con Google', token };
+}
 }
