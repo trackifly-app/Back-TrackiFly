@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { OrderDetail } from './entities/order-detail.entity';
-import { CreateOrderDetailDto } from './dto/create-order-detail.dto';
-import { UpdateOrderDetailDto } from './dto/update-order-detail.dto';
+import { Injectable } from "@nestjs/common";
+import { DataSource, Repository } from "typeorm";
+import { OrderDetail } from "./entities/order-detail.entity";
+import { CreateOrderDetailDto } from "./dto/create-order-detail.dto";
+import { UpdateOrderDetailDto } from "./dto/update-order-detail.dto";
 
 @Injectable()
 export class OrderDetailsRepository extends Repository<OrderDetail> {
   constructor(private dataSource: DataSource) {
     super(OrderDetail, dataSource.createEntityManager());
   }
+
   async createDetail(createDto: CreateOrderDetailDto): Promise<OrderDetail> {
     const subtotal = createDto.quantity * createDto.unitPrice;
     const detail = this.create({

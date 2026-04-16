@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { OrderDetail } from "./order-detail.entity";
+import { OrderDetail } from "../../order-details/entities/order-detail.entity";
 
 @Entity("orders")
 export class Order {
