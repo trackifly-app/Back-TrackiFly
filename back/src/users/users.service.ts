@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserStatus } from '../common/enums/user-status.enum';
 
 @Injectable()
 export class UsersService {
@@ -27,5 +28,9 @@ export class UsersService {
 
   async deleteUser(id: string): Promise<string> {
     return this.usersRepository.softDeleteUser(id);
+  }
+
+  async changeUserStatus(id: string, status: UserStatus): Promise<Omit<User, 'password'>> {
+    return this.usersRepository.changeUserStatus(id, status);
   }
 }
