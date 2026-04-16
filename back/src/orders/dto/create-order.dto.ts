@@ -1,11 +1,10 @@
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsString, IsInt, Min } from "class-validator";
 
 export class CreateOrderDto {
-  @IsNotEmpty()
   @IsString()
-  readonly product: string;
+  product: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  readonly quantity: number;
+  @IsInt()
+  @Min(1)
+  quantity: number;
 }

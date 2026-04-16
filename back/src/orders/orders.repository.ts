@@ -9,18 +9,26 @@ export class OrdersRepository extends Repository<Order> {
   constructor(private dataSource: DataSource) {
     super(Order, dataSource.createEntityManager());
   }
-  async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
-    const order = this.create(createOrderDto);
+  async createOrder(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
+    const order = this.create({
+      product: createOrderDto.product,
+      quantity: createOrderDto.quantity,
+      user: { id: userId },
+    });
     return await this.save(order);
   }
 
   async findAllOrders(): Promise<Order[]> {
-    return await this.find();
+    return await this.find({ relations: ['user', 'details'] });
   }
 
   async findOrderById(id: number): Promise<Order | undefined> {
-    const order = await this.findOne({ where: { id } });
+    const order = await this.findOne({ where: { id }, relations: ['user', 'details'] });
     return order ?? undefined;
+  }
+
+  async findOrdersByUser(userId: string): Promise<Order[]> {
+    return await this.find({ where: { user: { id: userId } }, relations: ['user', 'details'] });
   }
 
   async updateOrder(
