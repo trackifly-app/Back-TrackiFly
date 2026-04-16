@@ -11,6 +11,7 @@ import {
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserStatus } from '../common/enums/user-status.enum';
 
 @Controller('users')
 export class UsersController {
@@ -39,14 +40,35 @@ export class UsersController {
   async updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateData: UpdateUserDto,
-  ): Promise<Omit<User, 'password'>> {
-    return this.usersService.updateUser(id, updateData);
+  ) {
+    const updatedUser = await this.usersService.updateUser(id, updateData);
+    return {
+      message: 'Usuario actualizado exitosamente.',
+      user_id: updatedUser.id,
+    };
   }
 
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<string> {
-    return this.usersService.deleteUser(id);
+  ) {
+    const deletedId = await this.usersService.deleteUser(id);
+    return {
+      message: 'Usuario eliminado exitosamente.',
+      user_id: deletedId,
+    };
+  }
+
+  @Put(':id/status')
+  async changeUserStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('status') status: UserStatus,
+  ) {
+    const updatedUser = await this.usersService.changeUserStatus(id, status);
+    return {
+      message: `El estado del usuario ha sido actualizado correctamente.`,
+      user_id: updatedUser.id,
+      status: updatedUser.status,
+    };
   }
 }

@@ -38,6 +38,11 @@ export class ProfileFactory {
       });
       await manager.save(company);
     });
+
+    this.handlers.set(Role.Operator, async (dto, user, manager) => {
+      // El operador hereda el modelo User sin datos extendidos en otras tablas por el momento
+      return Promise.resolve();
+    });
   }
 
   async createByRole(

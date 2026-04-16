@@ -3,24 +3,34 @@ import { Role } from '../../common/enums/role.enum';
 export interface RoleCatalogEntry {
   seedOnBootstrap: boolean;
   allowSelfSignUp: boolean;
+  requiresApproval: boolean;
 }
 
 export const ROLE_CATALOG: Record<Role, RoleCatalogEntry> = {
   [Role.User]: {
     seedOnBootstrap: true,
     allowSelfSignUp: true,
+    requiresApproval: false,
   },
   [Role.Company]: {
     seedOnBootstrap: true,
     allowSelfSignUp: true,
+    requiresApproval: true,
+  },
+  [Role.Operator]: {
+    seedOnBootstrap: true,
+    allowSelfSignUp: false,
+    requiresApproval: false,
   },
   [Role.Admin]: {
     seedOnBootstrap: true,
     allowSelfSignUp: false,
+    requiresApproval: false,
   },
   [Role.SuperAdmin]: {
     seedOnBootstrap: true,
     allowSelfSignUp: false,
+    requiresApproval: false,
   },
 };
 
