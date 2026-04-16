@@ -11,6 +11,7 @@ import {
 import { Roles } from '../../roles/entities/roles.entity';
 import { Profile } from '../../profiles/entities/profile.entity';
 import { Company } from '../../companies/entities/company.entity';
+import { UserStatus } from '../../common/enums/user-status.enum';
 
 @Entity({ name: 'USERS' })
 export class User {
@@ -50,4 +51,11 @@ export class User {
 
   @OneToOne(() => Company, (company) => company.user)
   company?: Company;
+
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.APPROVED })
+  status: UserStatus;
+
+  @ManyToOne(() => User, (user) => user.id, { nullable: true })
+  @JoinColumn({ name: 'parent_company_id' })
+  parentCompany?: User;
 }
