@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
+import { OrderStatus } from '../../common/enums/order-status.enum';
 
 export class UpdateOrderDto {
   @IsOptional()
@@ -8,4 +9,8 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsNumber()
   readonly quantity?: number;
+
+  @IsOptional()
+  @IsEnum(OrderStatus)
+  readonly status?: OrderStatus;
 }
