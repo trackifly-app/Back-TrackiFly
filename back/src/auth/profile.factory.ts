@@ -7,6 +7,8 @@ import { RegisterDto } from './types/register-dto.type';
 import { Role } from '../common/enums/role.enum';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { RegisterCompanyDto } from './dtos/register-company.dto';
+import { RegisterOperatorDto } from './dtos/register-operator.dto';
+import { Gender } from '../common/enums/gender.enum';
 
 type ProfileHandler = (dto: RegisterDto, user: User, manager: EntityManager) => Promise<void>;
 
@@ -22,6 +24,9 @@ export class ProfileFactory {
         last_name: payload.last_name,
         gender: payload.gender,
         birthdate: payload.birthdate,
+        address: payload.address,
+        phone: payload.phone,
+        country: payload.country,
         user: user,
       });
       await manager.save(profile);
@@ -34,14 +39,27 @@ export class ProfileFactory {
         industry: payload.industry,
         contact_name: payload.contact_name,
         plan: payload.plan,
+        address: payload.address,
+        phone: payload.phone,
+        country: payload.country,
         user: user,
       });
       await manager.save(company);
     });
 
     this.handlers.set(Role.Operator, async (dto, user, manager) => {
-      // El operador hereda el modelo User sin datos extendidos en otras tablas por el momento
-      return Promise.resolve();
+      const payload = dto as RegisterOperatorDto;
+      const profile = manager.create(Profile, {
+        first_name: payload.first_name,
+        last_name: payload.last_name,
+        gender: Gender.Other, // Default as operator doesn't supply it
+        birthdate: new Date().toISOString(), // Default 
+        address: payload.address,
+        phone: payload.phone,
+        country: payload.country,
+        user: user,
+      });
+      await manager.save(profile);
     });
   }
 

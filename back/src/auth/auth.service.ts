@@ -57,9 +57,6 @@ export class AuthService {
         const user = manager.create(User, {
           email: dto.email,
           password: hashedPassword,
-          phone: dto.phone,
-          address: dto.address,
-          country: dto.country,
           role,
           status: initialStatus,
         });
@@ -99,6 +96,10 @@ export class AuthService {
     const validPassword = await bcrypt.compare(password, foundUser.password);
     if (!validPassword) {
       throw new BadRequestException('Email o password Incorrectos');
+    }
+
+    if (foundUser.status !== UserStatus.APPROVED) {
+      throw new BadRequestException('La cuenta aún no ha sido aprobada o fue rechazada');
     }
 
     if (foundUser.role.name === Role.Operator) {
@@ -143,9 +144,6 @@ export class AuthService {
         const user = manager.create(User, {
           email: dto.email,
           password: hashedPassword,
-          phone: dto.phone,
-          address: dto.address,
-          country: dto.country,
           role,
           status: initialStatus,
           parentCompany: { id: parentCompany.id } as User,
@@ -201,9 +199,9 @@ export class AuthService {
           last_name,
           gender: null,
           birthdate: null,
-          address: null,
-          phone: null,
-          country: null,
+          address: 'Google Default',
+          phone: '0000000000',
+          country: 'US',
         } as unknown as RegisterUserDto,
         savedUser,
         manager,
