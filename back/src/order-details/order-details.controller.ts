@@ -6,12 +6,15 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
 } from "@nestjs/common";
+import { AuthGuard } from "../common/guards/auth.guard";
 import { OrderDetailsService } from "./order-details.service";
 import { CreateOrderDetailDto } from "./dto/create-order-detail.dto";
 import { UpdateOrderDetailDto } from "./dto/update-order-detail.dto";
 
 @Controller("order-details")
+@UseGuards(AuthGuard)
 export class OrderDetailsController {
   constructor(private readonly orderDetailsService: OrderDetailsService) {}
 

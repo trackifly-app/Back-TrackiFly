@@ -8,12 +8,16 @@ import { Order } from './entities/order.entity';
 export class OrdersService {
   constructor(private readonly ordersRepository: OrdersRepository) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    return await this.ordersRepository.createOrder(createOrderDto);
+  async create(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
+    return await this.ordersRepository.createOrder(createOrderDto, userId);
   }
 
   async findAll(): Promise<Order[]> {
     return await this.ordersRepository.findAllOrders();
+  }
+
+  async findByUser(userId: string): Promise<Order[]> {
+    return await this.ordersRepository.findOrdersByUser(userId);
   }
 
   async findOne(id: number): Promise<Order> {
