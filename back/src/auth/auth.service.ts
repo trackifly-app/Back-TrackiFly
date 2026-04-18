@@ -166,6 +166,7 @@ export class AuthService {
   async googleSignIn(dto: GoogleAuthDto) {
   // Si el usuario ya existe, generamos token directamente
   let user = await this.usersRepository.getUserByEmail(dto.email);
+  const isNew = !user
 
   if (!user) {
     // Usuario nuevo: lo creamos en una transacción
@@ -225,6 +226,6 @@ export class AuthService {
   };
 
   const token = this.jwtService.sign(payload);
-  return { message: 'Usuario autenticado con Google', token };
+  return { message: 'Usuario autenticado con Google', token, isNew };
 }
 }
