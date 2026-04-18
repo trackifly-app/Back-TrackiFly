@@ -19,10 +19,10 @@ export class Profile {
   @Column({ type: 'varchar', length: 80, nullable: false })
   last_name: string;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   birthdate: string;
 
-  @Column({ type: 'enum', enum: Gender, nullable: false })
+  @Column({ type: 'enum', enum: Gender, nullable: true })
   gender: Gender;
 
   @Column({ type: 'varchar', length: 15, nullable: false, default: '1234567' })
