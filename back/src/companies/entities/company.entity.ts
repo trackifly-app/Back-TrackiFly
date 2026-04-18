@@ -25,6 +25,15 @@ export class Company {
   @Column({ type: 'enum', enum: CompanyPlan, nullable: false, default: CompanyPlan.FREE })
   plan: CompanyPlan;
 
+  @Column({ type: 'varchar', length: 15, nullable: false, default: '1234567' })
+  phone: string;
+
+  @Column({ type: 'varchar', length: 150, nullable: false, default: 'Sin dirección' })
+  address: string;
+
+  @Column({ type: 'varchar', length: 2, nullable: false, default: 'US' })
+  country: string;
+
   @OneToOne(() => User, (user) => user.company, {
     nullable: false,
     onDelete: 'CASCADE',

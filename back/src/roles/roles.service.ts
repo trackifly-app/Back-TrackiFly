@@ -98,9 +98,6 @@ export class RolesService {
     const superAdmin = this.ormUsersRepository.create({
       email,
       password: hashedPassword,
-      phone: '0000000000',
-      country: 'XX',
-      address: 'System',
       role: superAdminRole,
     });
 
