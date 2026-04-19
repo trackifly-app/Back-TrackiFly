@@ -15,7 +15,7 @@ export const ROLE_CATALOG: Record<Role, RoleCatalogEntry> = {
   [Role.Company]: {
     seedOnBootstrap: true,
     allowSelfSignUp: true,
-    requiresApproval: true,
+    requiresApproval: false,
   },
   [Role.Operator]: {
     seedOnBootstrap: true,
