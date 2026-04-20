@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -25,7 +26,7 @@ export class CreateCompanyDto {
   @MaxLength(80, { message: 'El nombre de contacto no puede tener más de 80 caracteres' })
   contact_name: string;
 
-  @IsNotEmpty({ message: 'El plan no puede estar vacío' })
+  @IsOptional()
   @IsEnum(CompanyPlan, { message: 'El plan debe ser un valor válido' })
-  plan: CompanyPlan;
+  plan?: CompanyPlan;
 }
