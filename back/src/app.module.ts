@@ -21,6 +21,8 @@ import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
 import { OrderDetailsModule } from "./order-details/order-details.module";
 
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,6 +48,7 @@ import { OrderDetailsModule } from "./order-details/order-details.module";
     RolesModule,
     OrdersModule,
     OrderDetailsModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
