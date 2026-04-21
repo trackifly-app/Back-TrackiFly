@@ -17,4 +17,11 @@ export class CompaniesService {
   ): Promise<Company> {
     return this.companiesRepository.updateCompany(userId, updateData);
   }
+
+  async updateCompanyImage(
+    userId: string,
+    profileImage: string,
+  ): Promise<Company> {
+    return this.companiesRepository.updateCompanyImage(userId, profileImage);
+  }
 }
