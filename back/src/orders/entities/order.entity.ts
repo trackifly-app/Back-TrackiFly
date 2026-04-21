@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
-import { OrderDetail } from '../../order-details/entities/order-detail.entity';
-import { User } from '../../users/entities/user.entity';
-import { OrderStatus } from '../../common/enums/order-status.enum';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+} from "typeorm";
+import { OrderDetail } from "../../order-details/entities/order-detail.entity";
+import { User } from "../../users/entities/user.entity";
+import { OrderStatus } from "../../common/enums/order-status.enum";
 
-@Entity('orders')
+@Entity("orders")
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
@@ -11,13 +17,19 @@ export class Order {
   @Column()
   product: string;
 
-  @Column('int')
+  @Column("int")
   quantity: number;
 
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
+  @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.Pending })
   status: OrderStatus;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @Column({ nullable: true })
+  pickup_direction: string;
+
+  @Column({ nullable: true })
+  delivery_direction: string;
+
+  @ManyToOne(() => User, { nullable: false, onDelete: "CASCADE" })
   user: User;
 
   @OneToMany(() => OrderDetail, (detail) => detail.order, { cascade: true })

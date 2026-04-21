@@ -2,12 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser'; 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
+
   app.enableCors({
-    origin: '*',       //permite conexion con front
+    origin: [
+      'http://localhost:3000',
+      'https://front-tracki-fly.vercel.app',
+    ],
+    credentials: true,
+          //permite conexion con front
   });
 
   app.useGlobalPipes(
@@ -29,4 +37,4 @@ async function bootstrap() {
   
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();
