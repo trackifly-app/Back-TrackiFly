@@ -42,7 +42,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: "60m",
+        expiresIn: "7d",
       },
     }),
     RolesModule,
