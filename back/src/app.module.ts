@@ -21,7 +21,9 @@ import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
 import { OrderDetailsModule } from "./order-details/order-details.module";
 
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CategoriesModule } from "./categories/categories.module";
+
+import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
 @Module({
   imports: [
@@ -42,12 +44,13 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: "60m",
+        expiresIn: "7d",
       },
     }),
     RolesModule,
     OrdersModule,
     OrderDetailsModule,
+    CategoriesModule,
     CloudinaryModule,
   ],
   controllers: [AppController],
