@@ -6,9 +6,9 @@ export declare const typeOrmConfig: (() => {
     port: number;
     username: string | undefined;
     password: string | undefined;
+    autoLoadEntities: boolean;
     entities: string[];
     migrations: string[];
-    autoLoadEntities: boolean;
     logging: boolean;
     synchronize: boolean;
     dropSchema: boolean;
@@ -19,9 +19,9 @@ export declare const typeOrmConfig: (() => {
     port: number;
     username: string | undefined;
     password: string | undefined;
+    autoLoadEntities: boolean;
     entities: string[];
     migrations: string[];
-    autoLoadEntities: boolean;
     logging: boolean;
     synchronize: boolean;
     dropSchema: boolean;

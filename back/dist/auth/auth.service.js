@@ -41,77 +41,194 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const users_repository_1 = require("../user/users.repository");
-const bcrypt = __importStar(require("bcrypt"));
+const typeorm_1 = require("typeorm");
+const users_repository_1 = require("../users/users.repository");
+const role_enum_1 = require("../common/enums/role.enum");
+const user_entity_1 = require("../users/entities/user.entity");
 const jwt_1 = require("@nestjs/jwt");
-const typeorm_1 = require("@nestjs/typeorm");
-const roles_entity_1 = require("../user/entities/roles.entity");
-const typeorm_2 = require("typeorm");
+const profile_factory_1 = require("./profile.factory");
+const roles_service_1 = require("../roles/roles.service");
+const bcrypt = __importStar(require("bcrypt"));
+const role_catalog_constant_1 = require("../roles/constants/role-catalog.constant");
+const user_status_enum_1 = require("../common/enums/user-status.enum");
 let AuthService = class AuthService {
-    userRespository;
+    usersRepository;
     jwtService;
-    roleRepository;
-    constructor(userRespository, jwtService, roleRepository) {
-        this.userRespository = userRespository;
+    dataSource;
+    profileFactory;
+    rolesService;
+    constructor(usersRepository, jwtService, dataSource, profileFactory, rolesService) {
+        this.usersRepository = usersRepository;
         this.jwtService = jwtService;
-        this.roleRepository = roleRepository;
+        this.dataSource = dataSource;
+        this.profileFactory = profileFactory;
+        this.rolesService = rolesService;
     }
-    async singUp(newUserData) {
-        const { email, password, roleId, ...rest } = newUserData;
-        if (!email || !password)
-            throw new common_1.NotFoundException('Email o password Incorrectos');
-        const foundUser = await this.userRespository.getUserByEmail(email);
-        if (foundUser)
-            throw new common_1.BadRequestException(`El Usuario ya se encuentra registrado`);
-        const role = roleId
-            ? await this.roleRepository.findOneBy({ id: roleId })
-            : await this.roleRepository.findOne({ where: { name: 'cliente' } });
-        if (!role) {
-            throw new common_1.BadRequestException('El rol no existe');
+    async signUp(dto, roleName) {
+        if (!this.rolesService.isSelfSignUpAllowed(roleName)) {
+            throw new common_1.BadRequestException(`El rol "${roleName}" no está habilitado para registro público`);
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return await this.userRespository.addUser({
-            ...rest,
-            email,
-            password: hashedPassword,
-            role,
-        });
+        const existingUser = await this.usersRepository.getUserByEmail(dto.email);
+        if (existingUser) {
+            throw new common_1.BadRequestException('El email ya se encuentra registrado');
+        }
+        try {
+            return await this.dataSource.transaction(async (manager) => {
+                const role = await this.rolesService.getRoleByName(roleName, manager);
+                if (!role) {
+                    throw new common_1.BadRequestException(`El rol "${roleName}" no existe`);
+                }
+                const initialStatus = role_catalog_constant_1.ROLE_CATALOG[roleName].requiresApproval ? user_status_enum_1.UserStatus.PENDING : user_status_enum_1.UserStatus.APPROVED;
+                const hashedPassword = await bcrypt.hash(dto.password, 10);
+                const user = manager.create(user_entity_1.User, {
+                    email: dto.email,
+                    password: hashedPassword,
+                    role,
+                    status: initialStatus,
+                });
+                const savedUser = await manager.save(user);
+                await this.profileFactory.createByRole(roleName, dto, savedUser, manager);
+                return savedUser.id;
+            });
+        }
+        catch (error) {
+            if (error instanceof typeorm_1.QueryFailedError) {
+                const driverError = error.driverError;
+                if (driverError?.code === '23505') {
+                    throw new common_1.ConflictException('El email ya se encuentra registrado');
+                }
+            }
+            throw error;
+        }
     }
-    async singIn(email, password) {
-        if (!email || !password) {
-            throw new common_1.BadRequestException('Email o password Incorrectos');
-        }
-        const foundUser = await this.userRespository.getUserByEmail(email);
+    async signIn(loginDto) {
+        const { email, password } = loginDto;
+        const foundUser = await this.usersRepository.getUserByEmail(email);
         if (!foundUser) {
             throw new common_1.BadRequestException('Email o password Incorrectos');
+        }
+        if (!foundUser.is_active) {
+            throw new common_1.BadRequestException('La cuenta se encuentra desactivada');
         }
         const validPassword = await bcrypt.compare(password, foundUser.password);
         if (!validPassword) {
             throw new common_1.BadRequestException('Email o password Incorrectos');
         }
+        if (foundUser.status !== user_status_enum_1.UserStatus.APPROVED) {
+            throw new common_1.BadRequestException('La cuenta aún no ha sido aprobada o fue rechazada');
+        }
+        if (foundUser.role.name === role_enum_1.Role.Operator) {
+            if (!foundUser.parentCompany || foundUser.parentCompany.status !== user_status_enum_1.UserStatus.APPROVED) {
+                throw new common_1.BadRequestException('La empresa contratista no está autorizada para operar');
+            }
+        }
         const payload = {
             id: foundUser.id,
-            role: foundUser.role?.name ?? 'cliente',
+            role: foundUser.role.name,
+            status: foundUser.status,
         };
         const token = this.jwtService.sign(payload);
         return {
             message: 'Usuario Logeado',
-            token: token,
+            token,
         };
+    }
+    async registerOperator(dto, companyId) {
+        const parentCompany = await this.usersRepository.getUserById(companyId);
+        if (!parentCompany) {
+            throw new common_1.BadRequestException('Empresa no encontrada');
+        }
+        const roleName = role_enum_1.Role.Operator;
+        const existingUser = await this.usersRepository.getUserByEmail(dto.email);
+        if (existingUser) {
+            throw new common_1.BadRequestException('El email ya se encuentra registrado');
+        }
+        try {
+            return await this.dataSource.transaction(async (manager) => {
+                const role = await this.rolesService.getRoleByName(roleName, manager);
+                if (!role)
+                    throw new common_1.BadRequestException(`El rol "${roleName}" no existe`);
+                const initialStatus = role_catalog_constant_1.ROLE_CATALOG[roleName].requiresApproval ? user_status_enum_1.UserStatus.PENDING : user_status_enum_1.UserStatus.APPROVED;
+                const hashedPassword = await bcrypt.hash(dto.password, 10);
+                const user = manager.create(user_entity_1.User, {
+                    email: dto.email,
+                    password: hashedPassword,
+                    role,
+                    status: initialStatus,
+                    parentCompany: { id: parentCompany.id },
+                });
+                const savedUser = await manager.save(user);
+                await this.profileFactory.createByRole(roleName, dto, savedUser, manager);
+                return savedUser.id;
+            });
+        }
+        catch (error) {
+            if (error instanceof typeorm_1.QueryFailedError) {
+                const driverError = error.driverError;
+                if (driverError?.code === '23505') {
+                    throw new common_1.ConflictException('El email ya se encuentra registrado');
+                }
+            }
+            throw error;
+        }
+    }
+    async googleSignIn(dto) {
+        let user = await this.usersRepository.getUserByEmail(dto.email);
+        const isNew = !user;
+        if (!user) {
+            await this.dataSource.transaction(async (manager) => {
+                const role = await this.rolesService.getRoleByName(role_enum_1.Role.User, manager);
+                if (!role)
+                    throw new common_1.BadRequestException('Rol no encontrado');
+                const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
+                const newUser = manager.create(user_entity_1.User, {
+                    email: dto.email,
+                    password: randomPassword,
+                    role,
+                    status: user_status_enum_1.UserStatus.APPROVED,
+                    phone: '',
+                    address: '',
+                    country: '',
+                });
+                const savedUser = await manager.save(newUser);
+                const [first_name, ...rest] = dto.name.trim().split(' ');
+                const last_name = rest.join(' ') || '';
+                await this.profileFactory.createByRole(role_enum_1.Role.User, {
+                    email: dto.email,
+                    password: randomPassword,
+                    first_name,
+                    last_name,
+                    gender: null,
+                    birthdate: null,
+                    address: 'Google Default',
+                    phone: '0000000000',
+                    country: 'US',
+                }, savedUser, manager);
+                user = savedUser;
+            });
+        }
+        if (!user.is_active) {
+            throw new common_1.BadRequestException('La cuenta se encuentra desactivada');
+        }
+        const payload = {
+            id: user.id,
+            role: user.role.name,
+            status: user.status,
+        };
+        const token = this.jwtService.sign(payload);
+        return { message: 'Usuario autenticado con Google', token, isNew };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __param(2, (0, typeorm_1.InjectRepository)(roles_entity_1.Role)),
     __metadata("design:paramtypes", [users_repository_1.UsersRepository,
         jwt_1.JwtService,
-        typeorm_2.Repository])
+        typeorm_1.DataSource,
+        profile_factory_1.ProfileFactory,
+        roles_service_1.RolesService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

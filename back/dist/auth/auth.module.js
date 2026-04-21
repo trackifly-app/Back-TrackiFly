@@ -10,18 +10,17 @@ exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
-const typeorm_1 = require("@nestjs/typeorm");
-const users_entity_1 = require("../user/entities/users.entity");
-const users_repository_1 = require("../user/users.repository");
-const roles_entity_1 = require("../user/entities/roles.entity");
+const users_module_1 = require("../users/users.module");
+const roles_module_1 = require("../roles/roles.module");
+const profile_factory_1 = require("./profile.factory");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([users_entity_1.Users, roles_entity_1.Role])],
+        imports: [users_module_1.UsersModule, roles_module_1.RolesModule],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, users_repository_1.UsersRepository],
+        providers: [auth_service_1.AuthService, profile_factory_1.ProfileFactory],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

@@ -45,5 +45,7 @@ exports.environment = {
     DB_USERNAME: process.env.DB_USERNAME,
     DB_PASSWORD: process.env.DB_PASSWORD,
     JWT_SECRET: process.env.JWT_SECRET,
+    SUPERADMIN_EMAIL: process.env.SUPERADMIN_EMAIL,
+    SUPERADMIN_PASSWORD: process.env.SUPERADMIN_PASSWORD,
 };
 //# sourceMappingURL=environment.js.map

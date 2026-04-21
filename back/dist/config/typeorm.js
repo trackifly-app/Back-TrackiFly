@@ -11,14 +11,13 @@ const config = {
     port: environment_1.environment.DB_PORT,
     username: environment_1.environment.DB_USERNAME,
     password: environment_1.environment.DB_PASSWORD,
-    entities: [__dirname + '/../entities/*.entity.{ts,js}', 'dist/**/*.entity{.ts,.js}'],
-    migrations: ['dist/migrations/*{.ts,.js}'],
     autoLoadEntities: true,
+    entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+    migrations: ['dist/migrations/*{.ts,.js}'],
     logging: false,
     synchronize: true,
-    dropSchema: false,
+    dropSchema: true,
 };
-console.log('TypeORM config:', config);
 exports.typeOrmConfig = (0, config_1.registerAs)('typeorm', () => config);
 exports.connectionSource = new typeorm_1.DataSource(config);
 //# sourceMappingURL=typeorm.js.map

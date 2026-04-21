@@ -7,4 +7,6 @@ export declare const environment: {
     DB_USERNAME: string | undefined;
     DB_PASSWORD: string | undefined;
     JWT_SECRET: string | undefined;
+    SUPERADMIN_EMAIL: string | undefined;
+    SUPERADMIN_PASSWORD: string | undefined;
 };
