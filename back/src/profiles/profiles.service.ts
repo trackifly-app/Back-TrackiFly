@@ -17,4 +17,11 @@ export class ProfilesService {
   ): Promise<Profile> {
     return this.profilesRepository.updateProfile(userId, updateData);
   }
+
+  async updateProfileImage(
+    userId: string,
+    profileImage: string,
+  ): Promise<Profile> {
+    return this.profilesRepository.updateProfileImage(userId, profileImage);
+  }
 }

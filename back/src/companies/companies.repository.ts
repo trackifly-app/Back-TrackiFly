@@ -32,4 +32,13 @@ export class CompaniesRepository {
     const merged = this.ormCompaniesRepository.merge(company, updateData);
     return this.ormCompaniesRepository.save(merged);
   }
+
+  async updateCompanyImage(
+    userId: string,
+    profile_image: string,
+  ): Promise<Company> {
+    const company = await this.getCompanyByUserId(userId);
+    company.profile_image = profile_image;
+    return this.ormCompaniesRepository.save(company);
+  }
 }

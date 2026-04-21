@@ -5,14 +5,16 @@ import {
   Param,
   ParseUUIDPipe,
   Put,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from "@nestjs/common";
 import { CompaniesService } from "./companies.service";
 import { Company } from "./entities/company.entity";
 import { UpdateCompanyDto } from "./dto/update-company.dto";
 
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
-import { UploadCompanyImageDto } from "./dto/upload-company-image.dto";
-import { Buffer } from "buffer";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("companies")
 export class CompaniesController {
@@ -37,24 +39,27 @@ export class CompaniesController {
   }
 
   @Put("user/:userId/image")
+  @UseInterceptors(FileInterceptor('image'))
   async uploadCompanyImage(
     @Param("userId", ParseUUIDPipe) userId: string,
-    @Body() body: UploadCompanyImageDto,
+    @UploadedFile() file: any,
   ) {
-    let result;
-    if (body.imageBase64) {
-      const buffer = Buffer.from(body.imageBase64, "base64");
-      result = await this.cloudinaryService.uploadImage(buffer, {
-        folder: "companies",
-      });
-    } else if (body.imageUrl) {
-      result = await this.cloudinaryService.uploadImageFromUrl(body.imageUrl, {
-        folder: "companies",
-      });
-    } else {
-      return { error: "Debes enviar imageBase64 o imageUrl" };
+    if (!file) {
+      throw new BadRequestException("No se ha enviado ninguna imagen");
     }
-    // Aquí podrías guardar result.secure_url en la entidad Company
-    return { url: result.secure_url };
+
+    const result = await this.cloudinaryService.uploadImage(file.buffer, {
+      folder: "companies",
+    });
+
+    const updatedCompany = await this.companiesService.updateCompanyImage(
+      userId,
+      result.secure_url,
+    );
+
+    return { 
+      message: "Imagen actualizada correctamente", 
+      url: updatedCompany.profile_image 
+    };
   }
 }
