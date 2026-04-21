@@ -1,3 +1,4 @@
 .env.development
 dist/
 node_modules
+cookies.txt

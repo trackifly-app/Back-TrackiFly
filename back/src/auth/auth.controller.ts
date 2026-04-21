@@ -12,6 +12,8 @@ import { GoogleAuthDto } from './dtos/google-auth.dto';
 
 @Controller('auth')
 export class AuthController {
+  private readonly isProd = process.env.NODE_ENV === 'production';
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup/user')
@@ -36,8 +38,8 @@ export class AuthController {
     // Seteamos el token en una cookie httpOnly
     res.cookie('token', token, {
       httpOnly: true,                         // JS no puede leerla
-      secure: process.env.NODE_ENV === 'production', // solo HTTPS en producción
-      sameSite: 'lax',                        // protección CSRF
+      secure: this.isProd, // solo HTTPS en producción
+      sameSite: this.isProd? 'none' : 'lax',                        // ← necesario para cookies cross-site con Railway y V
       maxAge: 1000 * 60 * 60 * 24 * 7,       // 7 días
     });
 
@@ -49,8 +51,8 @@ export class AuthController {
     // Borramos la cookie
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: this.isProd,
+      sameSite: this.isProd? 'none' : 'lax',
     });
     return res.json({ message: 'Sesión cerrada exitosamente' });
   }
@@ -80,8 +82,8 @@ export class AuthController {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: this.isProd,
+      sameSite: this.isProd? 'none' : 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
