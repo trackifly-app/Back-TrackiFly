@@ -34,6 +34,14 @@ export class Profile {
   @Column({ type: 'varchar', length: 2, nullable: false, default: 'US' })
   country: string;
 
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default:
+      'https://res.cloudinary.com/dkmqkhlhf/image/upload/v1776749068/boxicons-ze3urB416yE-unsplash_emsxhm.png',
+  })
+  profile_image: string;
+
   @OneToOne(() => User, (user) => user.profile, {
     nullable: false,
     onDelete: 'CASCADE',
