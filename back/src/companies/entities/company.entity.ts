@@ -22,8 +22,8 @@ export class Company {
   @Column({ type: 'varchar', length: 80, nullable: false })
   contact_name: string;
 
-  @Column({ type: 'enum', enum: CompanyPlan, nullable: false, default: CompanyPlan.FREE })
-  plan: CompanyPlan;
+  @Column({ type: 'enum', enum: CompanyPlan, nullable: true, default: CompanyPlan.FREE })
+  plan?: CompanyPlan;
 
   @Column({ type: 'varchar', length: 15, nullable: false, default: '1234567' })
   phone: string;
