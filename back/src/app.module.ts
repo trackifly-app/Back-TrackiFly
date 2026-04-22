@@ -25,6 +25,7 @@ import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { PaymentsModule } from "./payments/payments.module";
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
     CategoriesModule,
     CloudinaryModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
