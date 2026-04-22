@@ -32,4 +32,13 @@ export class ProfilesRepository {
     const merged = this.ormProfilesRepository.merge(profile, updateData);
     return this.ormProfilesRepository.save(merged);
   }
+
+  async updateProfileImage(
+    userId: string,
+    profile_image: string,
+  ): Promise<Profile> {
+    const profile = await this.getProfileByUserId(userId);
+    profile.profile_image = profile_image;
+    return this.ormProfilesRepository.save(profile);
+  }
 }

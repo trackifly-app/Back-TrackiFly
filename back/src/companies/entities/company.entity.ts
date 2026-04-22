@@ -22,8 +22,25 @@ export class Company {
   @Column({ type: 'varchar', length: 80, nullable: false })
   contact_name: string;
 
-  @Column({ type: 'enum', enum: CompanyPlan, nullable: false, default: CompanyPlan.FREE })
-  plan: CompanyPlan;
+  @Column({ type: 'enum', enum: CompanyPlan, nullable: true, default: CompanyPlan.FREE })
+  plan?: CompanyPlan;
+
+  @Column({ type: 'varchar', length: 15, nullable: false, default: '1234567' })
+  phone: string;
+
+  @Column({ type: 'varchar', length: 150, nullable: false, default: 'Sin dirección' })
+  address: string;
+
+  @Column({ type: 'varchar', length: 2, nullable: false, default: 'US' })
+  country: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default:
+      'https://res.cloudinary.com/dkmqkhlhf/image/upload/v1776749068/boxicons-ze3urB416yE-unsplash_emsxhm.png',
+  })
+  profile_image: string;
 
   @OneToOne(() => User, (user) => user.company, {
     nullable: false,

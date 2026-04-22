@@ -1,17 +1,42 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { OrderDetail } from "../../order-details/entities/order-detail.entity";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { OrderDetail } from "./order-detail.entity";
+import { User } from "../../users/entities/user.entity";
+import { OrderStatus } from "../../common/enums/order-status.enum";
 
 @Entity("orders")
 export class Order {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-  @Column()
-  product: string;
+  @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.Pending })
+  status: OrderStatus;
 
-  @Column("int")
-  quantity: number;
+  @Column({ type: "varchar", name: "pickup_direction", nullable: true })
+  pickup_direction: string;
+
+  @Column({ type: "varchar", name: "delivery_direction", nullable: true })
+  delivery_direction: string;
+
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+  distance: number;
+
+  @ManyToOne(() => User, { nullable: false, onDelete: "CASCADE" })
+  user: User;
 
   @OneToMany(() => OrderDetail, (detail) => detail.order, { cascade: true })
   details: OrderDetail[];
+
+  @CreateDateColumn({ name: "created_at" })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: "updated_at" })
+  updated_at: Date;
 }

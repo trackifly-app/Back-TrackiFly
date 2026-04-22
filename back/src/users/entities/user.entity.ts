@@ -24,15 +24,6 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: false })
   password: string;
 
-  @Column({ type: 'varchar', length: 15, nullable: false })
-  phone: string;
-
-  @Column({ type: 'varchar', length: 150, nullable: false })
-  address: string;
-
-  @Column({ type: 'varchar', length: 2, nullable: false })
-  country: string;
-
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
@@ -55,7 +46,7 @@ export class User {
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.APPROVED })
   status: UserStatus;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'parent_company_id' })
   parentCompany?: User;
 }

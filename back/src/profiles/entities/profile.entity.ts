@@ -19,11 +19,28 @@ export class Profile {
   @Column({ type: 'varchar', length: 80, nullable: false })
   last_name: string;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   birthdate: string;
 
-  @Column({ type: 'enum', enum: Gender, nullable: false })
+  @Column({ type: 'enum', enum: Gender, nullable: true })
   gender: Gender;
+
+  @Column({ type: 'varchar', length: 15, nullable: false, default: '1234567' })
+  phone: string;
+
+  @Column({ type: 'varchar', length: 150, nullable: false, default: 'Sin dirección' })
+  address: string;
+
+  @Column({ type: 'varchar', length: 2, nullable: false, default: 'US' })
+  country: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default:
+      'https://res.cloudinary.com/dkmqkhlhf/image/upload/v1776749068/boxicons-ze3urB416yE-unsplash_emsxhm.png',
+  })
+  profile_image: string;
 
   @OneToOne(() => User, (user) => user.profile, {
     nullable: false,
