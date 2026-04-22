@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { environment } from '../config/environment';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { Role } from '../common/enums/role.enum';
 
 // Porcentaje de descuento para empresas — lo dejamos como constante
 // para que sea fácil de cambiar sin tocar la lógica
@@ -34,7 +35,8 @@ export class PaymentsService {
   ) {
     // Leemos el rol del usuario que viene del JWT (lo pone AuthGuard en req.user)
     // Si es Company aplicamos el 20% de descuento, si no el precio va tal cual
-    const isCompany = user.role === 'Company';
+    const isCompany = (user.role as Role) === Role.Company ||
+                      (user.role as Role) === Role.Operator;
     const finalAmount = isCompany
       ? dto.amount * (1 - COMPANY_DISCOUNT)
       : dto.amount;
