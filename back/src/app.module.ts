@@ -20,6 +20,7 @@ import { RolesService } from "./roles/roles.service";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
 import { OrderDetailsModule } from "./order-details/order-details.module";
+import { PaymentsModule } from "./payments/payments.module";
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { OrderDetailsModule } from "./order-details/order-details.module";
     RolesModule,
     OrdersModule,
     OrderDetailsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
