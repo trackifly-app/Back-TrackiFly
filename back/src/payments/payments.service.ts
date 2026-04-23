@@ -1,29 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { environment } from '../config/environment';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Role } from '../common/enums/role.enum';
+import { OrdersRepository } from '../orders/orders.repository';
+import { OrderStatus } from '../common/enums/order-status.enum';
 
-// Porcentaje de descuento para empresas — lo dejamos como constante
-// para que sea fácil de cambiar sin tocar la lógica
 const COMPANY_DISCOUNT = 0.20;
 
-// MercadoPago nos manda el webhook como `any`, así que definimos
-// la forma que esperamos para que TypeScript no se queje
 interface WebhookBody {
-  type: string;         // MP manda "payment", "merchant_order", etc.
-  data?: { id: string }; // el id del pago, viene dentro de data
+  type: string;
+  data?: { id: string };
 }
 
 @Injectable()
 export class PaymentsService {
-  // Guardamos la instancia de MP en la clase para no crearla
-  // cada vez que alguien llama a createPreference
   private readonly mp: MercadoPagoConfig;
 
-  constructor() {
-    // Acá le decimos a MP con qué cuenta operar.
-    // El accessToken identifica nuestra app — sin esto MP rechaza todo
+  constructor(
+    // Necesitamos el repositorio de órdenes para crearlas y actualizarlas
+    // cuando llega la confirmación del pago
+    private readonly ordersRepository: OrdersRepository,
+  ) {
     this.mp = new MercadoPagoConfig({
       accessToken: environment.MP_ACCESS_TOKEN!,
     });
@@ -33,52 +31,74 @@ export class PaymentsService {
     dto: CreatePaymentDto,
     user: { id: string; role: string }
   ) {
-    // Leemos el rol del usuario que viene del JWT (lo pone AuthGuard en req.user)
-    // Si es Company aplicamos el 20% de descuento, si no el precio va tal cual
-    const isCompany = (user.role as Role) === Role.Company ||
-                      (user.role as Role) === Role.Operator;
+    // Tanto empresas como sus operadores tienen descuento preferencial.
+    // Un operador trabaja para una empresa, así que tiene sentido
+    // que también pague el precio de empresa
+    const isCompany =
+      (user.role as Role) === Role.Company ||
+      (user.role as Role) === Role.Operator;
+
     const finalAmount = isCompany
       ? dto.amount * (1 - COMPANY_DISCOUNT)
       : dto.amount;
 
-    // Preference es la clase del SDK que representa
-    // "quiero cobrar X por este concepto"
+    // Creamos la orden ANTES de ir a MercadoPago.
+    // ¿Por qué? Porque si MP falla después, ya tenemos registro
+    // de que el usuario intentó pagar. La orden nace en Pending
+    // y cambia a Paid solo cuando MP confirma el cobro
+    const order = await this.ordersRepository.createOrder(
+      {
+        pickup_direction: dto.pickup_direction,
+        delivery_direction: dto.delivery_direction,
+        distance: dto.distance,
+        name: dto.name,
+        description: dto.description,
+        weight: dto.weight,
+        height: dto.height,
+        width: dto.width,
+        depth: dto.depth,
+        unit: dto.unit,
+        fragile: dto.fragile,
+        dangerous: dto.dangerous,
+        cooled: dto.cooled,
+        urgent: dto.urgent,
+        category_id: dto.category_id as string,
+      },
+      user.id,
+    );
+
     const preference = new Preference(this.mp);
 
-    // MP trabaja con "items" como si fuera un carrito.
-    // En nuestro caso siempre es un solo ítem: el envío
     const response = await preference.create({
       body: {
         items: [
           {
-            id: 'envio-trackifly',      // id interno nuestro, puede ser lo que quieras
-            title: 'Envío Trackifly',   // lo que ve el usuario en la pantalla de MP
+            // Usamos el id de nuestra orden como id del item en MP.
+            // Así cuando llega el webhook sabemos exactamente qué orden confirmar
+            id: order.id,
+            title: 'Envío Trackifly',
             quantity: 1,
-            unit_price: finalAmount,    // el monto ya con descuento aplicado si corresponde
-            currency_id: 'ARS',        // moneda — Argentina
+            unit_price: finalAmount,
+            currency_id: 'ARS',
           },
         ],
-
-        // Acá le decimos a MP a dónde mandar al usuario después del pago.
-        // Estas rutas las tiene que tener el front creadas
         back_urls: {
           success: `${environment.FRONTEND_URL}/payment/success`,
           failure: `${environment.FRONTEND_URL}/payment/failure`,
           pending: `${environment.FRONTEND_URL}/payment/pending`,
         },
-
-        // Con esto le decimos que si el pago fue aprobado,
-        // que redirija automáticamente sin que el usuario tenga que hacer click
+        // Si el pago fue aprobado MP redirige solo sin que el usuario
+        // tenga que hacer click en "volver al sitio"
         auto_return: 'approved',
-
-        // Esta es la URL que MP va a llamar cuando el pago cambie de estado.
-        // Tiene que ser una URL pública — por eso usamos la de Railway
+        // Esta URL tiene que ser pública — Railway la expone al mundo.
+        // MP la llama cada vez que el estado del pago cambia
         notification_url: `${environment.APP_URL}/api/mercadopago/webhook`,
-
-        // Guardamos data nuestra dentro del pago para poder
-        // identificar después quién pagó y con qué descuento
+        // Guardamos datos nuestros dentro del pago de MP.
+        // Esto nos permite saber quién pagó y con qué descuento
+        // sin tener que consultar nuestra DB desde el webhook
         metadata: {
           user_id: user.id,
+          order_id: order.id,
           role: user.role,
           original_amount: dto.amount,
           final_amount: finalAmount,
@@ -87,35 +107,58 @@ export class PaymentsService {
       },
     });
 
-    // Devolvemos al front la URL de pago (init_point) y datos del precio
-    // para que pueda mostrar el desglose antes de redirigir
+    // MP nos devuelve un preference_id — lo guardamos en la orden
+    // para poder encontrarla cuando llegue el webhook.
+    // También guardamos el monto final para tener registro de lo que se cobró
+    await this.ordersRepository.update(order.id, {
+      preference_id: response.id!,
+      total_amount: finalAmount,
+    });
+
+    // El front necesita la checkout_url para redirigir al usuario a pagar.
+    // Le mandamos también el desglose del precio para que pueda mostrárselo
     return {
-      checkout_url: response.init_point,  // ← el front redirige acá
+      checkout_url: response.init_point,
       preference_id: response.id,
+      order_id: order.id,
       original_amount: dto.amount,
       final_amount: finalAmount,
       discount_applied: isCompany ? '20%' : null,
     };
   }
 
-  // Este método lo llama el controller cuando MP toca el webhook.
-  // Por ahora solo registramos el pago en consola —
-  // acá es donde más adelante podés guardar el pago en la DB,
-  // cambiar el estado de una orden, mandar un mail, etc.
-  handleWebhook(body: WebhookBody) {
-    // MP manda muchos tipos de notificaciones (merchant_order, payment, etc.)
-    // Nosotros solo nos interesa "payment"
+async handleWebhook(body: WebhookBody) {
     if (body.type !== 'payment') return { received: true };
 
     const paymentId = body.data?.id;
     if (!paymentId) return { received: true };
 
-    // Por ahora logueamos — próximo paso: consultar el pago a MP
-    // con este id y guardarlo en la base de datos
-    console.log(`Pago recibido: ${paymentId}`);
+    const paymentClient = new Payment(this.mp);
+    
+    // Casteamos la respuesta porque el SDK de MP no exporta
+    // todos sus tipos correctamente — preference_id y status
+    // existen en runtime pero TypeScript no los ve sin el casteo
+    const payment = await paymentClient.get({ id: paymentId }) as {
+      preference_id?: string;
+      status?: string;
+    };
 
-    // Siempre devolvemos 200 a MP para que sepa que recibimos la notificación.
-    // Si devolvemos error, MP reintenta varias veces
+    const preferenceId = payment.preference_id;
+    const status = payment.status;
+
+    if (!preferenceId) return { received: true };
+
+    const order = await this.ordersRepository.findOrderByPreferenceId(preferenceId);
+    if (!order) return { received: true };
+
+    if (status === 'approved') {
+      await this.ordersRepository.updateOrderStatus(order.id, OrderStatus.Paid);
+      console.log(`Orden ${order.id} pagada — lista para procesar`);
+    } else if (status === 'rejected') {
+      await this.ordersRepository.updateOrderStatus(order.id, OrderStatus.Cancelled);
+      console.log(`Pago rechazado para la orden ${order.id}`);
+    }
+
     return { received: true };
   }
 }
