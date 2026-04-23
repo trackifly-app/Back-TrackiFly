@@ -33,8 +33,8 @@ export class OrdersController {
 
   @Get(":id")
   async findOne(@Request() req: any, @Param("id") id: string) {
-    const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    const order = await this.ordersService.findOne(+id);
+    if (order.user.id !== req.user.id) {
       throw new ForbiddenException("No tienes permiso para ver esta orden");
     }
     return order;
@@ -46,23 +46,23 @@ export class OrdersController {
     @Param("id") id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    const order = await this.ordersService.findOne(+id);
+    if (order.user.id !== req.user.id) {
       throw new ForbiddenException(
         "No tienes permiso para actualizar esta orden",
       );
     }
-    return this.ordersService.update(id, updateOrderDto);
+    return this.ordersService.update(+id, updateOrderDto);
   }
 
   @Delete(":id")
   async remove(@Request() req: any, @Param("id") id: string) {
-    const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    const order = await this.ordersService.findOne(+id);
+    if (order.user.id !== req.user.id) {
       throw new ForbiddenException(
         "No tienes permiso para eliminar esta orden",
       );
     }
-    return this.ordersService.remove(id);
+    return this.ordersService.remove(+id);
   }
 }

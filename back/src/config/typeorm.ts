@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { environment } from './environment';
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { DataSourceOptions } from 'typeorm/browser';
 
 const config = {
   type: 'postgres',
@@ -14,7 +15,7 @@ const config = {
   migrations: ['dist/migrations/*{.ts,.js}'],
   logging: false,
   synchronize: true,
-  dropSchema: false,
+  dropSchema: true,
 };
 
 export const typeOrmConfig = registerAs('typeorm', () => config);
