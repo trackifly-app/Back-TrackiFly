@@ -1,9 +1,16 @@
-import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Delete } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Post()
+  create(@Body() dto: CreateCategoryDto) {
+    return this.categoriesService.create(dto);
+  }
 
   @Get()
   findAll() {
@@ -13,5 +20,15 @@ export class CategoriesController {
   @Get(':id')
   findById(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.findById(id);
+  }
+
+  @Put(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCategoryDto) {
+    return this.categoriesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.categoriesService.delete(id);
   }
 }
