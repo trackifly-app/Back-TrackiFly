@@ -5,6 +5,7 @@ import {
   OnApplicationBootstrap,
 } from "@nestjs/common";
 import { AppController } from "./app.controller";
+import { BullModule } from "@nestjs/bull";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { typeOrmConfig } from "./config/typeorm";
@@ -19,7 +20,6 @@ import { RolesModule } from "./roles/roles.module";
 import { RolesService } from "./roles/roles.service";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
-
 
 import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
@@ -53,6 +53,12 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
     CategoriesModule,
     CloudinaryModule,
+    BullModule.forRoot({
+      redis: {
+        host: "localhost",
+        port: 6379,
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

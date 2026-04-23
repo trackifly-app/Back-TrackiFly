@@ -65,4 +65,19 @@ export class OrdersController {
     }
     return this.ordersService.remove(id);
   }
+
+  // Endpoint temporal para pruebas: simula confirmación de pago y dispara el job
+  @Post(":id/confirm-payment")
+  async confirmPayment(@Request() req: any, @Param("id") id: string) {
+    const order = await this.ordersService.findOne(id);
+    if (order.userId !== req.user.id) {
+      throw new ForbiddenException(
+        "No tienes permiso para confirmar esta orden",
+      );
+    }
+    await this.ordersService.confirmPayment(id);
+    return {
+      message: "Pago confirmado y job de cambio de estado programado (3 min)",
+    };
+  }
 }
