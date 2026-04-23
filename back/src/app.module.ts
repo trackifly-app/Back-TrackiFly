@@ -46,7 +46,7 @@ import { PaymentsModule } from "./payments/payments.module";
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: "60m",
+        expiresIn: "7d",
       },
     }),
     RolesModule,
