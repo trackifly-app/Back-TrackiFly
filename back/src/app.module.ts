@@ -19,11 +19,13 @@ import { RolesModule } from "./roles/roles.module";
 import { RolesService } from "./roles/roles.service";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
-import { OrderDetailsModule } from "./order-details/order-details.module";
+
 
 import { CategoriesModule } from "./categories/categories.module";
+import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { PaymentsModule } from "./payments/payments.module";
 
 @Module({
   imports: [
@@ -49,15 +51,19 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
     }),
     RolesModule,
     OrdersModule,
-    OrderDetailsModule,
+
     CategoriesModule,
     CloudinaryModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule, OnApplicationBootstrap {
-  constructor(private readonly rolesService: RolesService) {}
+  constructor(
+    private readonly rolesService: RolesService,
+    private readonly categoriesService: CategoriesService,
+  ) {}
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes("*");
   }
@@ -66,5 +72,7 @@ export class AppModule implements NestModule, OnApplicationBootstrap {
     console.log("Roles Cargados...");
     await this.rolesService.seedSuperAdmin();
     console.log("Usuario Super administrador Cargado...");
+    await this.categoriesService.seedCategories();
+    console.log("Categorías Cargadas...");
   }
 }
