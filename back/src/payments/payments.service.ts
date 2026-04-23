@@ -89,7 +89,7 @@ export class PaymentsService {
         },
         // Si el pago fue aprobado MP redirige solo sin que el usuario
         // tenga que hacer click en "volver al sitio"
-        auto_return: 'approved',
+        // auto_return: 'approved',  RECUERDA DESCOMENTAR PARA DEPLOY DE FRONT
         // Esta URL tiene que ser pública — Railway la expone al mundo.
         // MP la llama cada vez que el estado del pago cambia
         notification_url: `${environment.APP_URL}/api/mercadopago/webhook`,
