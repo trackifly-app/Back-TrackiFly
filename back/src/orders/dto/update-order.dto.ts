@@ -1,10 +1,24 @@
-import { PartialType } from "@nestjs/swagger";
-import { CreateOrderDto } from "./create-order.dto";
-import { IsEnum, IsOptional } from "class-validator";
+import { IsOptional, IsString, IsNumber, IsEnum } from "class-validator";
 import { OrderStatus } from "../../common/enums/order-status.enum";
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {
+export class UpdateOrderDto {
   @IsOptional()
-  @IsEnum(OrderStatus, { message: 'El estado debe ser un valor válido (pending, processing, completed, cancelled)' })
-  status?: OrderStatus;
+  @IsString()
+  readonly product?: string;
+
+  @IsOptional()
+  @IsNumber()
+  readonly quantity?: number;
+
+  @IsOptional()
+  @IsEnum(OrderStatus)
+  readonly status?: OrderStatus;
+
+  @IsOptional()
+  @IsString()
+  readonly pickup_direction?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly delivery_direction?: string;
 }
