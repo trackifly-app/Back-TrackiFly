@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request) || this.extractTokenFromHeader(request);
+    const token = this.extractTokenFromCookie(request) || this.extractTokenFromHeader(request);
 
     if (!token) {
       throw new UnauthorizedException('Token inválido o expirado');

@@ -39,4 +39,10 @@ export class Order {
 
   @UpdateDateColumn({ name: "updated_at" })
   updated_at: Date;
+
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+  total_amount: number;    // monto que pagó — viene de MP
+
+  @Column({ type: "varchar", nullable: true })
+  preference_id: string;   // id de MP — relaciona el pago con la orden
 }

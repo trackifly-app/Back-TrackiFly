@@ -25,6 +25,7 @@ import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { PaymentsModule } from "./payments/payments.module";
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: "60m",
+        expiresIn: "7d",
       },
     }),
     RolesModule,
@@ -53,6 +54,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
     CategoriesModule,
     CloudinaryModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
