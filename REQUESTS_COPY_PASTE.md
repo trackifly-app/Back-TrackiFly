@@ -139,6 +139,7 @@ Authorization: Bearer {{TOKEN_AQUI}}
 Content-Type: application/json
 
 {
+  "userId": "Agregar id de usuario",
   "name": "Paquete de electrónica",
   "category_id": "{{CATEGORIA_ID}}",
   "description": "Monitor LG 27 pulgadas, nuevo en caja",
@@ -160,8 +161,7 @@ Content-Type: application/json
 
 **Reemplazar:**
 
-- `{{TOKEN_AQUI}}` - Token de login
-- `{{CATEGORIA_ID}}` - ID de categoría de paso 2
+
 
 **Guardar:** `id` de la respuesta para los siguientes pasos
 

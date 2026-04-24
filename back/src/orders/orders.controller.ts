@@ -16,21 +16,22 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 
 @Controller("orders")
-@UseGuards(AuthGuard)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto, @Request() req: any) {
-    return this.ordersService.create(createOrderDto, req.user.id);
+  create(@Body() createOrderDto: CreateOrderDto) {
+    return this.ordersService.create(createOrderDto, createOrderDto.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   findAll(@Request() req: any) {
     const userId = req.user.id;
     return this.ordersService.findByUser(userId);
   }
 
+  @UseGuards(AuthGuard)
   @Get(":id")
   async findOne(@Request() req: any, @Param("id") id: string) {
     const order = await this.ordersService.findOne(id);
@@ -42,12 +43,11 @@ export class OrdersController {
 
   @Patch(":id")
   async update(
-    @Request() req: any,
     @Param("id") id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
     const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    if (order.userId !== updateOrderDto.userId) {
       throw new ForbiddenException(
         "No tienes permiso para actualizar esta orden",
       );
@@ -55,6 +55,7 @@ export class OrdersController {
     return this.ordersService.update(id, updateOrderDto);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(":id")
   async remove(@Request() req: any, @Param("id") id: string) {
     const order = await this.ordersService.findOne(id);
@@ -66,7 +67,7 @@ export class OrdersController {
     return this.ordersService.remove(id);
   }
 
-  // Endpoint temporal para pruebas: simula confirmación de pago y dispara el job
+  @UseGuards(AuthGuard)
   @Post(":id/confirm-payment")
   async confirmPayment(@Request() req: any, @Param("id") id: string) {
     const order = await this.ordersService.findOne(id);
