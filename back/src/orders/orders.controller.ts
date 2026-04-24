@@ -6,11 +6,9 @@ import {
   Param,
   Patch,
   Delete,
-  UseGuards,
-  Request,
+  Query,
   ForbiddenException,
 } from "@nestjs/common";
-import { AuthGuard } from "../common/guards/auth.guard";
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -24,18 +22,21 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto, createOrderDto.userId);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
-  findAll(@Request() req: any) {
-    const userId = req.user.id;
+  findAll(@Query("userId") userId: string) {
+    if (!userId) {
+      throw new ForbiddenException("userId es requerido como query parameter");
+    }
     return this.ordersService.findByUser(userId);
   }
 
-  @UseGuards(AuthGuard)
   @Get(":id")
-  async findOne(@Request() req: any, @Param("id") id: string) {
+  async findOne(@Param("id") id: string, @Query("userId") userId: string) {
+    if (!userId) {
+      throw new ForbiddenException("userId es requerido como query parameter");
+    }
     const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    if (order.userId !== userId) {
       throw new ForbiddenException("No tienes permiso para ver esta orden");
     }
     return order;
@@ -55,11 +56,13 @@ export class OrdersController {
     return this.ordersService.update(id, updateOrderDto);
   }
 
-  @UseGuards(AuthGuard)
   @Delete(":id")
-  async remove(@Request() req: any, @Param("id") id: string) {
+  async remove(@Param("id") id: string, @Query("userId") userId: string) {
+    if (!userId) {
+      throw new ForbiddenException("userId es requerido como query parameter");
+    }
     const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    if (order.userId !== userId) {
       throw new ForbiddenException(
         "No tienes permiso para eliminar esta orden",
       );
@@ -67,18 +70,23 @@ export class OrdersController {
     return this.ordersService.remove(id);
   }
 
-  @UseGuards(AuthGuard)
   @Post(":id/confirm-payment")
-  async confirmPayment(@Request() req: any, @Param("id") id: string) {
+  async confirmPayment(
+    @Param("id") id: string,
+    @Query("userId") userId: string,
+  ) {
+    if (!userId) {
+      throw new ForbiddenException("userId es requerido como query parameter");
+    }
     const order = await this.ordersService.findOne(id);
-    if (order.userId !== req.user.id) {
+    if (order.userId !== userId) {
       throw new ForbiddenException(
         "No tienes permiso para confirmar esta orden",
       );
     }
     await this.ordersService.confirmPayment(id);
     return {
-      message: "Pago confirmado y job de cambio de estado programado (3 min)",
+      message: "Pago confirmado, cambio de estado programado en 3 minutos",
     };
   }
 }

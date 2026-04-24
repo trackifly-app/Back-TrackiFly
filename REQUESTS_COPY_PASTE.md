@@ -131,15 +131,14 @@ image: [selecciona un archivo JPG/PNG]
 
 ## PARTE 4: ÓRDENES
 
-### 9. CREAR ORDEN (el más importante)
+### 9. CREAR ORDEN (sin token necesario)
 
 ```
 POST http://localhost:3000/orders
-Authorization: Bearer {{TOKEN_AQUI}}
 Content-Type: application/json
 
 {
-  "userId": "Agregar id de usuario",
+  "userId": "{{user_id}}",
   "name": "Paquete de electrónica",
   "category_id": "{{CATEGORIA_ID}}",
   "description": "Monitor LG 27 pulgadas, nuevo en caja",
@@ -161,56 +160,69 @@ Content-Type: application/json
 
 **Reemplazar:**
 
-
+- `{{user_id}}` con el ID del usuario que guardaste en paso 3
+- `{{CATEGORIA_ID}}` con un ID de categoría del paso 2
 
 **Guardar:** `id` de la respuesta para los siguientes pasos
 
 ---
 
-### 10. OBTENER MIS ÓRDENES
+### 10. OBTENER MIS ÓRDENES (sin token necesario)
 
 ```
-GET http://localhost:3000/orders
-Authorization: Bearer {{TOKEN_AQUI}}
+GET http://localhost:3000/orders?userId={{user_id}}
 ```
+
+**Reemplazar:** `{{user_id}}` con tu ID de usuario
 
 ---
 
-### 11. OBTENER UNA ORDEN POR ID
+### 11. OBTENER UNA ORDEN POR ID (sin token necesario)
 
 ```
-GET http://localhost:3000/orders/{{order_id}}
-Authorization: Bearer {{TOKEN_AQUI}}
+GET http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
 ```
 
-**Reemplazar:** `{{order_id}}` con el ID que guardaste en paso 9
+**Reemplazar:**
+
+- `{{order_id}}` con el ID que guardaste en paso 9
+- `{{user_id}}` con tu ID de usuario
 
 ---
 
-### 12. ACTUALIZAR ORDEN
+### 12. ACTUALIZAR ORDEN (sin token necesario)
 
 ```
 PATCH http://localhost:3000/orders/{{order_id}}
-Authorization: Bearer {{TOKEN_AQUI}}
 Content-Type: application/json
 
 {
+  "userId": "{{user_id}}",
   "name": "Paquete de electrónica - URGENTE",
   "urgent": true,
   "weight": 9
 }
 ```
 
+**Reemplazar:**
+
+- `{{order_id}}` con el ID de la orden
+- `{{user_id}}` con tu ID de usuario
+
 **Nota:** Solo envía los campos que quieres cambiar
 
 ---
 
-### 13. CONFIRMAR PAGO (inicia cambio automático de estado)
+### 13. CONFIRMAR PAGO (sin token necesario, inicia cambio automático de estado)
 
 ```
-POST http://localhost:3000/orders/{{order_id}}/confirm-payment
-Authorization: Bearer {{TOKEN_AQUI}}
+POST http://localhost:3000/orders/{{order_id}}/confirm-payment?userId={{user_id}}
 ```
+
+**Reemplazar:**
+
+- `{{order_id}}` con el ID de la orden
+- `{{user_id}}` con tu ID de usuario
 
 **Después de ejecutar:**
 
@@ -222,12 +234,16 @@ Verifica con GET /orders para ver cambio de estado
 
 ---
 
-### 14. ELIMINAR ORDEN
+### 14. ELIMINAR ORDEN (sin token necesario)
 
 ```
-DELETE http://localhost:3000/orders/{{order_id}}
-Authorization: Bearer {{TOKEN_AQUI}}
+DELETE http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
 ```
+
+**Reemplazar:**
+
+- `{{order_id}}` con el ID de la orden
+- `{{user_id}}` con tu ID de usuario
 
 ---
 
