@@ -25,7 +25,7 @@ import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
-import { Payment } from "mercadopago";
+import { PaymentsModule } from "./payments/payments.module";
 
 @Module({
   imports: [
@@ -46,7 +46,7 @@ import { Payment } from "mercadopago";
       global: true,
       secret: environment.JWT_SECRET,
       signOptions: {
-        expiresIn: "60m",
+        expiresIn: "7d",
       },
     }),
     RolesModule,
@@ -54,6 +54,7 @@ import { Payment } from "mercadopago";
 
     CategoriesModule,
     CloudinaryModule,
+    PaymentsModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
