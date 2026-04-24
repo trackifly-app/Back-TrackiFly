@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "types": ["jest"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "ignoreDeprecations": "5.0",
+    "module": "commonjs",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
