@@ -27,6 +27,23 @@ export class CreateCompanyDto {
   contact_name: string;
 
   @IsOptional()
+  @IsString({ message: 'La dirección debe ser una cadena de texto' })
+  @MaxLength(255, { message: 'La dirección no puede tener más de 255 caracteres' })
+  address?: string;
+
+  @IsOptional()
+  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
+  @MinLength(7, { message: 'El teléfono debe tener al menos 7 caracteres' })
+  @MaxLength(15, { message: 'El teléfono no puede tener más de 15 caracteres' })
+  phone?: string;
+
+  @IsOptional()
+  @IsString({ message: 'El país debe ser una cadena de texto' })
+  @MinLength(2, { message: 'El país debe tener 2 caracteres (código ISO)' })
+  @MaxLength(2, { message: 'El país debe tener 2 caracteres (código ISO)' })
+  country?: string;
+
+  @IsOptional()
   @IsEnum(CompanyPlan, { message: 'El plan debe ser un valor válido' })
   plan?: CompanyPlan;
 }

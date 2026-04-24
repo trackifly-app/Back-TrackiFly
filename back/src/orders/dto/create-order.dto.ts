@@ -11,6 +11,10 @@ import {
 } from "class-validator";
 
 export class CreateOrderDto {
+  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
+  @IsUUID('4', { message: 'El ID del usuario debe ser un UUID válido' })
+  userId: string;
+
   @IsNotEmpty({ message: 'El nombre no puede estar vacío' })
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El nombre no puede exceder los 100 caracteres' })

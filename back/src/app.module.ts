@@ -5,6 +5,7 @@ import {
   OnApplicationBootstrap,
 } from "@nestjs/common";
 import { AppController } from "./app.controller";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { typeOrmConfig } from "./config/typeorm";
@@ -19,7 +20,6 @@ import { RolesModule } from "./roles/roles.module";
 import { RolesService } from "./roles/roles.service";
 import { LoggerMiddleware } from "./middleware/logger.middleware";
 import { OrdersModule } from "./orders/orders.module";
-
 
 import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
@@ -55,6 +55,7 @@ import { PaymentsModule } from "./payments/payments.module";
     CategoriesModule,
     CloudinaryModule,
     PaymentsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
