@@ -1,31 +1,57 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectQueue } from "@nestjs/bull";
-import { Queue } from "bullmq";
+import { Cron } from "@nestjs/schedule";
 import { OrderStatus } from "../common/enums/order-status.enum";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersRepository } from "./orders.repository";
 
+const STATUS_SEQUENCE = [
+  OrderStatus.Pending,
+  OrderStatus.Processing,
+  OrderStatus.Completed,
+];
+
 @Injectable()
 export class OrdersService {
-  constructor(
-    private readonly ordersRepository: OrdersRepository,
-    @InjectQueue("order-status") private readonly orderStatusQueue: Queue,
-  ) {}
+  private ordersAwaitingStatusChange: Map<string, number> = new Map();
+
+  constructor(private readonly ordersRepository: OrdersRepository) {}
+
   /**
    * Llama este método cuando el pago de la orden se confirme.
-   * Dispara el job para el cambio de estado automático.
+   * Marca la orden para cambio automático de estado.
    */
   async confirmPayment(orderId: string) {
     // Cambia el estado inicial a "pending"
     await this.updateStatus(orderId, OrderStatus.Pending);
 
-    // Crea el primer job para el cambio de estado
-    await this.orderStatusQueue.add(
-      "order-status",
-      { orderId, currentStatusIndex: 0 },
-      { delay: 3 * 60 * 1000 }, // 3 minutos para pruebas
+    // Marca la orden para cambio automático (índice 0 = pending)
+    this.ordersAwaitingStatusChange.set(orderId, 0);
+  }
+
+  /**
+   * Task programada cada 3 minutos para cambiar estados automáticamente
+   */
+  @Cron("*/3 * * * *")
+  async handleOrderStatusChange() {
+    const ordersToProcess = Array.from(
+      this.ordersAwaitingStatusChange.entries(),
     );
+
+    for (const [orderId, currentStatusIndex] of ordersToProcess) {
+      const nextStatusIndex = currentStatusIndex + 1;
+
+      if (nextStatusIndex < STATUS_SEQUENCE.length) {
+        const nextStatus = STATUS_SEQUENCE[nextStatusIndex];
+        await this.updateStatus(orderId, nextStatus);
+
+        // Actualizar el índice
+        this.ordersAwaitingStatusChange.set(orderId, nextStatusIndex);
+      } else {
+        // Orden completada, remover del mapa
+        this.ordersAwaitingStatusChange.delete(orderId);
+      }
+    }
   }
 
   /**

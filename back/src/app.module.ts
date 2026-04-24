@@ -5,7 +5,7 @@ import {
   OnApplicationBootstrap,
 } from "@nestjs/common";
 import { AppController } from "./app.controller";
-import { BullModule } from "@nestjs/bull";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { typeOrmConfig } from "./config/typeorm";
@@ -53,12 +53,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
     CategoriesModule,
     CloudinaryModule,
-    BullModule.forRoot({
-      redis: {
-        host: "localhost",
-        port: 6379,
-      },
-    }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
