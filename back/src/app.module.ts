@@ -25,6 +25,7 @@ import { CategoriesModule } from "./categories/categories.module";
 import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { Payment } from "mercadopago";
 
 @Module({
   imports: [
