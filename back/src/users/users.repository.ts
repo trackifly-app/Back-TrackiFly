@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserStatus } from '../common/enums/user-status.enum';
 
 @Injectable()
@@ -42,23 +41,6 @@ export class UsersRepository {
       where: { email },
       relations: ['role', 'profile', 'company', 'parentCompany'],
     });
-  }
-
-  async updateUser(
-    id: string,
-    updateData: UpdateUserDto,
-  ): Promise<Omit<User, 'password'>> {
-    const user = await this.ormUsersRepository.findOne({
-      where: { id },
-      relations: ['profile', 'company'],
-    });
-    if (!user) {
-      throw new NotFoundException(`No se encontró el usuario con id: ${id}`);
-    }
-    const merged = this.ormUsersRepository.merge(user, updateData);
-    const saved = await this.ormUsersRepository.save(merged);
-    const { password, ...filtered } = saved;
-    return filtered;
   }
 
   async softDeleteUser(id: string): Promise<string> {

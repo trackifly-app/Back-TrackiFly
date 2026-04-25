@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserStatus } from '../common/enums/user-status.enum';
 
 @Controller('users')
@@ -34,18 +33,6 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Omit<User, 'password'>> {
     return this.usersService.getUserById(id);
-  }
-
-  @Put(':id')
-  async updateUser(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateData: UpdateUserDto,
-  ) {
-    const updatedUser = await this.usersService.updateUser(id, updateData);
-    return {
-      message: 'Usuario actualizado exitosamente.',
-      user_id: updatedUser.id,
-    };
   }
 
   @Delete(':id')

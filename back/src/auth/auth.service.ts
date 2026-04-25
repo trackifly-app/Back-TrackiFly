@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { DataSource, QueryFailedError } from 'typeorm';
 import { UsersRepository } from '../users/users.repository';
-import { LoginDto } from './dtos/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { Role } from '../common/enums/role.enum';
 import { User } from '../users/entities/user.entity';
 import { Roles } from '../roles/entities/roles.entity';
@@ -16,9 +16,9 @@ import { RolesService } from '../roles/roles.service';
 import * as bcrypt from 'bcrypt';
 import { ROLE_CATALOG } from '../roles/constants/role-catalog.constant';
 import { UserStatus } from '../common/enums/user-status.enum';
-import { RegisterOperatorDto } from './dtos/register-operator.dto';
-import { GoogleAuthDto } from './dtos/google-auth.dto';
-import { RegisterUserDto } from './dtos/register-user.dto';
+import { RegisterOperatorDto } from './dto/register-operator.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class AuthService {
