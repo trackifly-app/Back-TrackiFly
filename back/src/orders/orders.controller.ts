@@ -30,6 +30,12 @@ export class OrdersController {
     return this.ordersService.findByUser(userId);
   }
 
+  @Get("track/:code")
+  async trackOrder(@Param("code") code: string) {
+    // Este endpoint es PÚBLICO. Cualquier persona con el código puede ver el estado.
+    return this.ordersService.findByTrackingCode(code);
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string, @Query("userId") userId: string) {
     if (!userId) {
@@ -70,6 +76,10 @@ export class OrdersController {
     return this.ordersService.remove(id);
   }
 
+  /* 
+  // ENDPOINT ELIMINADO PARA EVITAR CONFLICTOS
+  // El pago y el inicio del cron job ahora lo maneja exclusivamente el Webhook de MercadoPago
+  // en PaymentsService.handleWebhook()
   @Post(":id/confirm-payment")
   async confirmPayment(
     @Param("id") id: string,
@@ -89,4 +99,5 @@ export class OrdersController {
       message: "Pago confirmado, cambio de estado programado en 3 minutos",
     };
   }
+  */
 }

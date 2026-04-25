@@ -79,6 +79,12 @@ export class OrdersService {
     return order;
   }
 
+  async findByTrackingCode(code: string): Promise<any> {
+    const order = await this.ordersRepository.findOrderByTrackingCode(code);
+    if (!order) throw new NotFoundException("Order with this tracking code not found");
+    return order;
+  }
+
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<any> {
     const order = await this.ordersRepository.updateOrder(id, updateOrderDto);
     if (!order) throw new NotFoundException("Order not found");

@@ -88,4 +88,12 @@ export class CreateOrderDto {
   @IsNumber({}, { message: 'La distancia debe ser un número' })
   @Min(0, { message: 'La distancia no puede ser negativa' })
   distance: number;
+
+  @IsNotEmpty({ message: 'El precio es requerido' })
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'El precio debe ser un número válido' }
+  )
+  @Min(0, { message: 'El precio no puede ser negativo' })
+  price: number;
 }

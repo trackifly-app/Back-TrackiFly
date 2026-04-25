@@ -6,25 +6,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderStatus } from '../common/enums/order-status.enum';
 
-// Le decimos a TypeScript exactamente qué forma tiene el objeto
-// que devuelve createOrder — así otros servicios como payments
-// pueden usar order.id sin que TypeScript se queje
-interface CreatedOrderResult {
-  id: string;
-  status: string;
-  pickup_direction: string;
-  delivery_direction: string;
-  distance: number;
-  userId: string;
-  packageDetails: {
-    name: string;
-    weight: number;
-    dimensions: string;
-    fragile: boolean;
-    urgent: boolean;
-    category_id: string | undefined;
-  };
-}
+import { CreatedOrderResult } from './interfaces/created-order-result.interface';
 
 @Injectable()
 export class OrdersRepository extends Repository<Order> {
@@ -37,11 +19,15 @@ export class OrdersRepository extends Repository<Order> {
     userId: string,
   ): Promise<CreatedOrderResult> {
     return this.dataSource.transaction(async (manager) => {
+      const generatedCode = 'VLZ-2026-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
       // Primero creamos la orden con los datos del envío
       const order = manager.create(Order, {
+        tracking_code: generatedCode,
         pickup_direction: createOrderDto.pickup_direction,
         delivery_direction: createOrderDto.delivery_direction,
         distance: createOrderDto.distance,
+        price: createOrderDto.price,
         user: { id: userId } as any,
       });
 
@@ -49,10 +35,12 @@ export class OrdersRepository extends Repository<Order> {
 
       // Después creamos el detalle con los datos del paquete,
       // asociado a la orden que acabamos de guardar
+      const defaultImage = 'https://cdn-icons-png.flaticon.com/512/683/683030.png';
+      
       const detail = manager.create(OrderDetail, {
         name: createOrderDto.name,
         description: createOrderDto.description || '',
-        image: createOrderDto.image || '',
+        image: createOrderDto.image || defaultImage,
         weight: createOrderDto.weight,
         height: createOrderDto.height,
         width: createOrderDto.width,
@@ -70,10 +58,12 @@ export class OrdersRepository extends Repository<Order> {
 
       return {
         id: savedOrder.id,
+        tracking_code: savedOrder.tracking_code,
         status: savedOrder.status,
         pickup_direction: savedOrder.pickup_direction,
         delivery_direction: savedOrder.delivery_direction,
         distance: savedOrder.distance,
+        price: savedOrder.price,
         userId: userId,
         packageDetails: {
           name: detail.name,
@@ -81,6 +71,9 @@ export class OrdersRepository extends Repository<Order> {
           dimensions: `${detail.height}x${detail.width}x${detail.depth} ${detail.unit}`,
           fragile: detail.fragile,
           urgent: detail.urgent,
+          dangerous: detail.dangerous,
+          cooled: detail.cooled,
+          image: detail.image,
           category_id: createOrderDto.category_id,
         },
       };
@@ -114,10 +107,13 @@ export class OrdersRepository extends Repository<Order> {
     const detail = order.details?.[0];
     return {
       id: order.id,
+      tracking_code: order.tracking_code,
       status: order.status,
       pickup_direction: order.pickup_direction,
       delivery_direction: order.delivery_direction,
       distance: order.distance,
+      price: order.price,
+      total_amount: order.total_amount,
       created_at: order.created_at,
       userId: order.user?.id,
       package: detail
@@ -132,8 +128,11 @@ export class OrdersRepository extends Repository<Order> {
               depth: detail.depth,
               unit: detail.unit,
             },
+            image: detail.image,
             fragile: detail.fragile,
             urgent: detail.urgent,
+            dangerous: detail.dangerous,
+            cooled: detail.cooled,
             category: detail.category?.name || 'N/A',
           }
         : null,
@@ -163,6 +162,14 @@ export class OrdersRepository extends Repository<Order> {
       where: { preference_id: preferenceId },
     });
     return order ?? undefined;
+  }
+
+  async findOrderByTrackingCode(trackingCode: string): Promise<any | undefined> {
+    const order = await this.findOne({
+      where: { tracking_code: trackingCode },
+      relations: ['user', 'details', 'details.category'],
+    });
+    return order ? this.mapOrderResponse(order) : undefined;
   }
 
   async updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
