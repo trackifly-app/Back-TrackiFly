@@ -17,6 +17,7 @@ export class UsersRepository {
   ): Promise<Omit<User, 'password'>[]> {
     const skip = (page - 1) * limit;
     const users = await this.ormUsersRepository.find({
+      where: { is_active: true },
       skip,
       take: limit,
       relations: ['profile', 'company', 'parentCompany'],
@@ -26,7 +27,7 @@ export class UsersRepository {
 
   async getUserById(id: string): Promise<Omit<User, 'password'>> {
     const user = await this.ormUsersRepository.findOne({
-      where: { id },
+      where: { id, is_active: true },
       relations: ['profile', 'company', 'parentCompany'],
     });
     if (!user) {
