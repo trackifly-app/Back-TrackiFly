@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { OrderDetail } from './entities/order-detail.entity';
+import { Category } from '../categories/entities/category.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderStatus } from '../common/enums/order-status.enum';
@@ -18,6 +19,16 @@ export class OrdersRepository extends Repository<Order> {
     createOrderDto: CreateOrderDto,
     userId: string,
   ): Promise<CreatedOrderResult> {
+    // Validamos que la categoría exista antes de abrir la transacción
+    const category = await this.dataSource.getRepository(Category).findOne({
+      where: { id: createOrderDto.category_id },
+    });
+    if (!category) {
+      throw new NotFoundException(
+        `La categoría con id '${createOrderDto.category_id}' no existe. Consulta GET /categories para ver las categorías disponibles.`,
+      );
+    }
+
     return this.dataSource.transaction(async (manager) => {
       const generatedCode = 'VLZ-2026-' + Math.random().toString(36).substr(2, 6).toUpperCase();
 

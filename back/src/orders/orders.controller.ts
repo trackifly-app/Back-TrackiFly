@@ -75,29 +75,4 @@ export class OrdersController {
     }
     return this.ordersService.remove(id);
   }
-
-  /* 
-  // ENDPOINT ELIMINADO PARA EVITAR CONFLICTOS
-  // El pago y el inicio del cron job ahora lo maneja exclusivamente el Webhook de MercadoPago
-  // en PaymentsService.handleWebhook()
-  @Post(":id/confirm-payment")
-  async confirmPayment(
-    @Param("id") id: string,
-    @Query("userId") userId: string,
-  ) {
-    if (!userId) {
-      throw new ForbiddenException("userId es requerido como query parameter");
-    }
-    const order = await this.ordersService.findOne(id);
-    if (order.userId !== userId) {
-      throw new ForbiddenException(
-        "No tienes permiso para confirmar esta orden",
-      );
-    }
-    await this.ordersService.confirmPayment(id);
-    return {
-      message: "Pago confirmado, cambio de estado programado en 3 minutos",
-    };
-  }
-  */
 }

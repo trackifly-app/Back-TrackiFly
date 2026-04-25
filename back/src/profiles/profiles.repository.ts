@@ -21,6 +21,9 @@ export class ProfilesRepository {
         `No se encontró perfil para el usuario con id: ${userId}`,
       );
     }
+    if (profile.user) {
+      delete (profile.user as any).password;
+    }
     return profile;
   }
 
@@ -30,7 +33,11 @@ export class ProfilesRepository {
   ): Promise<Profile> {
     const profile = await this.getProfileByUserId(userId);
     const merged = this.ormProfilesRepository.merge(profile, updateData);
-    return this.ormProfilesRepository.save(merged);
+    const saved = await this.ormProfilesRepository.save(merged);
+    if (saved.user) {
+      delete (saved.user as any).password;
+    }
+    return saved;
   }
 
   async updateProfileImage(
@@ -39,6 +46,10 @@ export class ProfilesRepository {
   ): Promise<Profile> {
     const profile = await this.getProfileByUserId(userId);
     profile.profile_image = profile_image;
-    return this.ormProfilesRepository.save(profile);
+    const saved = await this.ormProfilesRepository.save(profile);
+    if (saved.user) {
+      delete (saved.user as any).password;
+    }
+    return saved;
   }
 }

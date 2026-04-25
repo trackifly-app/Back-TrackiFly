@@ -21,6 +21,9 @@ export class CompaniesRepository {
         `No se encontró empresa para el usuario con id: ${userId}`,
       );
     }
+    if (company.user) {
+      delete (company.user as any).password;
+    }
     return company;
   }
 
@@ -30,7 +33,11 @@ export class CompaniesRepository {
   ): Promise<Company> {
     const company = await this.getCompanyByUserId(userId);
     const merged = this.ormCompaniesRepository.merge(company, updateData);
-    return this.ormCompaniesRepository.save(merged);
+    const saved = await this.ormCompaniesRepository.save(merged);
+    if (saved.user) {
+      delete (saved.user as any).password;
+    }
+    return saved;
   }
 
   async updateCompanyImage(
@@ -39,6 +46,10 @@ export class CompaniesRepository {
   ): Promise<Company> {
     const company = await this.getCompanyByUserId(userId);
     company.profile_image = profile_image;
-    return this.ormCompaniesRepository.save(company);
+    const saved = await this.ormCompaniesRepository.save(company);
+    if (saved.user) {
+      delete (saved.user as any).password;
+    }
+    return saved;
   }
 }

@@ -58,4 +58,15 @@ export class UsersController {
       status: updatedUser.status,
     };
   }
+
+  @Put(':id/role-admin')
+  async makeAdmin(
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const updatedUser = await this.usersService.makeAdmin(id);
+    return {
+      message: 'El usuario ha sido promovido a administrador.',
+      user_id: updatedUser.id,
+    };
+  }
 }

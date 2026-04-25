@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import { environment } from "../config/environment";
 import { CreatePaymentDto } from "./dto/create-payment.dto";
@@ -36,11 +36,11 @@ export class PaymentsService {
     // 1. Buscamos la orden que el front acaba de crear
     const order = await this.ordersRepository.findOrderById(dto.orderId);
     if (!order) {
-      throw new Error("Order not found");
+      throw new NotFoundException("Order not found");
     }
 
     if (order.userId !== user.id) {
-      throw new Error("Unauthorized to pay for this order");
+      throw new ForbiddenException("Unauthorized to pay for this order");
     }
 
     // 2. Calculamos el precio final aplicando descuento de empresa si corresponde
@@ -79,7 +79,7 @@ export class PaymentsService {
         // auto_return: 'approved',  RECUERDA DESCOMENTAR PARA DEPLOY DE FRONT
         // Esta URL tiene que ser pública — Railway la expone al mundo.
         // MP la llama cada vez que el estado del pago cambia
-        notification_url: `${environment.APP_URL}/api/mercadopago/webhook`,
+        notification_url: `${environment.APP_URL}/mercadopago/webhook`,
         // Guardamos datos nuestros dentro del pago de MP.
         // Esto nos permite saber quién pagó y con qué descuento
         // sin tener que consultar nuestra DB desde el webhook

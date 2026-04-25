@@ -185,9 +185,6 @@ export class AuthService {
         password: randomPassword,
         role,
         status: UserStatus.APPROVED, // Google ya validó el email
-        phone:'',
-        address:'',
-        country:'',
       });
       const savedUser = await manager.save(newUser);
 
