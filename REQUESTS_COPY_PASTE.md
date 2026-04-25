@@ -213,28 +213,58 @@ Content-Type: application/json
 
 ---
 
-### 13. CONFIRMAR PAGO (sin token necesario, inicia cambio automático de estado)
+### 13. INICIAR PAGO CON MERCADOPAGO (Requiere Token)
 
 ```
-POST http://localhost:3000/orders/{{order_id}}/confirm-payment?userId={{user_id}}
+POST http://localhost:3000/mercadopago/create-preference
+Authorization: Bearer {{TOKEN_AQUI}}
+Content-Type: application/json
+
+{
+  "orderId": "{{order_id}}"
+}
 ```
 
 **Reemplazar:**
 
-- `{{order_id}}` con el ID de la orden
-- `{{user_id}}` con tu ID de usuario
+- `{{TOKEN_AQUI}}` con tu JWT token del paso 4 (Login)
+- `{{order_id}}` con el ID de la orden creada
 
-**Después de ejecutar:**
+**Respuesta Esperada:**
 
-1. El estado cambia inmediatamente a `pending`
-2. Después de 3 minutos → cambiar a `processing`
-3. Después de otros 3 minutos (6 total) → cambiar a `completed`
-
-Verifica con GET /orders para ver cambio de estado
+- Te devuelve un `checkout_url`. Abre esa URL en tu navegador para simular el pago real en el sandbox de MercadoPago.
 
 ---
 
-### 14. ELIMINAR ORDEN (sin token necesario)
+### 14. SIMULAR WEBHOOK DE MERCADOPAGO (Alternativa manual si no pagaste arriba)
+
+```
+POST http://localhost:3000/mercadopago/webhook
+Content-Type: application/json
+
+{
+  "type": "payment",
+  "data": {
+    "id": "123456789"
+  }
+}
+```
+
+**Nota:** Esto simula que MercadoPago avisó que el pago se hizo. El backend buscará la orden asociada y activará el cambio de estado automático (Cron Job).
+
+---
+
+### 15. RASTREO PÚBLICO (No requiere token ni userId)
+
+```
+GET http://localhost:3000/orders/track/{{tracking_code}}
+```
+
+**Reemplazar:** `{{tracking_code}}` con el código tipo `VLZ-2026-XXXXXX` que obtuviste al crear la orden.
+
+---
+
+### 16. ELIMINAR ORDEN (sin token necesario)
 
 ```
 DELETE http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
@@ -247,7 +277,7 @@ DELETE http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
 
 ---
 
-### 15. LOGOUT
+### 17. LOGOUT
 
 ```
 POST http://localhost:3000/auth/logout
@@ -257,7 +287,7 @@ POST http://localhost:3000/auth/logout
 
 ## PARTE 5: FLUJO DE EMPRESA
 
-### 16. REGISTRAR EMPRESA
+### 18. REGISTRAR EMPRESA
 
 ```
 POST http://localhost:3000/auth/signup/company
@@ -282,7 +312,7 @@ Content-Type: application/json
 
 ---
 
-### 17. CAMBIAR ESTADO DE EMPRESA A APPROVED (REQUIERE CREDENCIALES DE ADMIN)
+### 19. CAMBIAR ESTADO DE EMPRESA A APPROVED (REQUIERE CREDENCIALES DE ADMIN)
 
 ```
 PUT http://localhost:3000/users/{{company_user_id}}/status
@@ -293,41 +323,14 @@ Content-Type: application/json
 }
 ```
 
-**Reemplazar:** `{{company_user_id}}` con el ID de la empresa (paso 16)
-
-**Nota:** Normalmente lo hace un admin. Para pruebas, puedes hacer esto manualmente.
+**Reemplazar:** `{{company_user_id}}` con el ID de la empresa (paso 18)
 
 ---
 
-### 18. EMPRESA: OBTENER DATOS
+### 20. EMPRESA: OBTENER DATOS
 
 ```
 GET http://localhost:3000/companies/user/{{company_user_id}}
-```
-
----
-
-### 19. EMPRESA: ACTUALIZAR DATOS
-
-```
-PUT http://localhost:3000/companies/user/{{company_user_id}}
-Content-Type: application/json
-
-{
-  "company_name": "TransExpress LTDA",
-  "plan": "basic"
-}
-```
-
----
-
-### 20. EMPRESA: SUBIR LOGO
-
-```
-PUT http://localhost:3000/companies/user/{{company_user_id}}/image
-Content-Type: multipart/form-data
-
-image: [selecciona un archivo JPG/PNG]
 ```
 
 ---
@@ -343,8 +346,6 @@ Content-Type: application/json
   "password": "Password123!"
 }
 ```
-
-**Guardar:** Token para paso siguiente
 
 ---
 
@@ -372,28 +373,23 @@ Content-Type: application/json
 
 ## PARTE 6: GESTIÓN DE USUARIOS (ADMIN)
 
-### 23. OBTENER TODOS LOS USUARIOS
+### 23. PROMOVER A ADMINISTRADOR (Nuevo)
+
+```
+PUT http://localhost:3000/users/{{user_id}}/role-admin
+```
+
+---
+
+### 24. OBTENER TODOS LOS USUARIOS
 
 ```
 GET http://localhost:3000/users?page=1&limit=10
 ```
 
-**Parámetros:**
-
-- `page` - Número de página (por defecto 1)
-- `limit` - Registros por página (por defecto 5)
-
 ---
 
-### 24. OBTENER USUARIO POR ID
-
-```
-GET http://localhost:3000/users/{{user_id}}
-```
-
----
-
-### 25. ELIMINAR USUARIO
+### 25. ELIMINAR USUARIO (BORRADO LÓGICO)
 
 ```
 DELETE http://localhost:3000/users/{{user_id}}
@@ -442,7 +438,9 @@ Content-Type: application/json
 
 ```
 "pending"
+"paid"
 "processing"
+"shipped"
 "completed"
 "cancelled"
 ```
@@ -654,4 +652,4 @@ redis-server
 
 ---
 
-**Última actualización:** 22 de abril de 2026
+**Última actualización:** 25 de abril de 2026

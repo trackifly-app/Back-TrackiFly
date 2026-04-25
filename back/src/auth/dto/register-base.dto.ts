@@ -5,10 +5,12 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class RegisterBaseDto {
   @IsNotEmpty({ message: 'El email no puede estar vacío' })
   @IsEmail({}, { message: 'El email debe tener una estructura válida' })
+  @Transform(({ value }) => value?.trim().toLowerCase())
   email: string;
 
   @IsNotEmpty({ message: 'La contraseña no puede estar vacía' })

@@ -5,8 +5,10 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 
+import { RolesModule } from '../roles/roles.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), RolesModule],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],
   exports: [UsersRepository],

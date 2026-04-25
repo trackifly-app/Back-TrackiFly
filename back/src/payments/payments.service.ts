@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
 import { environment } from "../config/environment";
 import { CreatePaymentDto } from "./dto/create-payment.dto";
 import { Role } from "../common/enums/role.enum";
 import { OrdersRepository } from "../orders/orders.repository";
+import { OrdersService } from "../orders/orders.service";
 import { OrderStatus } from "../common/enums/order-status.enum";
 
 const COMPANY_DISCOUNT = 0.2;
@@ -21,6 +22,7 @@ export class PaymentsService {
     // Necesitamos el repositorio de órdenes para crearlas y actualizarlas
     // cuando llega la confirmación del pago
     private readonly ordersRepository: OrdersRepository,
+    private readonly ordersService: OrdersService,
   ) {
     this.mp = new MercadoPagoConfig({
       accessToken: environment.MP_ACCESS_TOKEN!,
@@ -31,42 +33,26 @@ export class PaymentsService {
     dto: CreatePaymentDto,
     user: { id: string; role: string },
   ) {
-    // Tanto empresas como sus operadores tienen descuento preferencial.
-    // Un operador trabaja para una empresa, así que tiene sentido
-    // que también pague el precio de empresa
+    // 1. Buscamos la orden que el front acaba de crear
+    const order = await this.ordersRepository.findOrderById(dto.orderId);
+    if (!order) {
+      throw new NotFoundException("Order not found");
+    }
+
+    if (order.userId !== user.id) {
+      throw new ForbiddenException("Unauthorized to pay for this order");
+    }
+
+    // 2. Calculamos el precio final aplicando descuento de empresa si corresponde
     const isCompany =
       (user.role as Role) === Role.Company ||
       (user.role as Role) === Role.Operator;
 
+    // El precio base viene de lo que guardamos en la orden
+    const basePrice = order.price || 0;
     const finalAmount = isCompany
-      ? dto.amount * (1 - COMPANY_DISCOUNT)
-      : dto.amount;
-
-    // Creamos la orden ANTES de ir a MercadoPago.
-    // ¿Por qué? Porque si MP falla después, ya tenemos registro
-    // de que el usuario intentó pagar. La orden nace en Pending
-    // y cambia a Paid solo cuando MP confirma el cobro
-    const order = await this.ordersRepository.createOrder(
-      {
-        userId: user.id,
-        pickup_direction: dto.pickup_direction,
-        delivery_direction: dto.delivery_direction,
-        distance: dto.distance,
-        name: dto.name,
-        description: dto.description,
-        weight: dto.weight,
-        height: dto.height,
-        width: dto.width,
-        depth: dto.depth,
-        unit: dto.unit,
-        fragile: dto.fragile,
-        dangerous: dto.dangerous,
-        cooled: dto.cooled,
-        urgent: dto.urgent,
-        category_id: dto.category_id as string,
-      },
-      user.id,
-    );
+      ? basePrice * (1 - COMPANY_DISCOUNT)
+      : basePrice;
 
     const preference = new Preference(this.mp);
 
@@ -93,7 +79,7 @@ export class PaymentsService {
         // auto_return: 'approved',  RECUERDA DESCOMENTAR PARA DEPLOY DE FRONT
         // Esta URL tiene que ser pública — Railway la expone al mundo.
         // MP la llama cada vez que el estado del pago cambia
-        notification_url: `${environment.APP_URL}/api/mercadopago/webhook`,
+        notification_url: `${environment.APP_URL}/mercadopago/webhook`,
         // Guardamos datos nuestros dentro del pago de MP.
         // Esto nos permite saber quién pagó y con qué descuento
         // sin tener que consultar nuestra DB desde el webhook
@@ -101,7 +87,7 @@ export class PaymentsService {
           user_id: user.id,
           order_id: order.id,
           role: user.role,
-          original_amount: dto.amount,
+          original_amount: basePrice,
           final_amount: finalAmount,
           discount_applied: isCompany,
         },
@@ -122,7 +108,7 @@ export class PaymentsService {
       checkout_url: response.init_point,
       preference_id: response.id,
       order_id: order.id,
-      original_amount: dto.amount,
+      original_amount: basePrice,
       final_amount: finalAmount,
       discount_applied: isCompany ? "20%" : null,
     };
@@ -154,8 +140,8 @@ export class PaymentsService {
     if (!order) return { received: true };
 
     if (status === "approved") {
-      await this.ordersRepository.updateOrderStatus(order.id, OrderStatus.Paid);
-      console.log(`Orden ${order.id} pagada — lista para procesar`);
+      await this.ordersService.confirmPayment(order.id);
+      console.log(`Orden ${order.id} pagada — lista para procesar en cron job`);
     } else if (status === "rejected") {
       await this.ordersRepository.updateOrderStatus(
         order.id,

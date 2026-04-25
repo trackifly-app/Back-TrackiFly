@@ -5,3 +5,4 @@ node_modules
 cookies.txt
 tsconfig.tsbuildinfo
 tsconfig.build.tsbuildinfo
+.vscode/
