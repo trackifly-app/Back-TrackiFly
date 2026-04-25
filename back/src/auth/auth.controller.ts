@@ -2,13 +2,13 @@ import { Body, Controller, Post, Get, Req, Res, UseGuards, ForbiddenException } 
 import type { Response } from 'express';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from './dtos/register-user.dto';
-import { RegisterCompanyDto } from './dtos/register-company.dto';
-import { RegisterOperatorDto } from './dtos/register-operator.dto';
-import { LoginDto } from './dtos/login.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { RegisterCompanyDto } from './dto/register-company.dto';
+import { RegisterOperatorDto } from './dto/register-operator.dto';
+import { LoginDto } from './dto/login.dto';
 import { Role } from '../common/enums/role.enum';
 import { AuthGuard } from './guards/auth.guard';
-import { GoogleAuthDto } from './dtos/google-auth.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 
 @Controller('auth')
 export class AuthController {

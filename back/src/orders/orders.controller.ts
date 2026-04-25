@@ -30,6 +30,12 @@ export class OrdersController {
     return this.ordersService.findByUser(userId);
   }
 
+  @Get("track/:code")
+  async trackOrder(@Param("code") code: string) {
+    // Este endpoint es PÚBLICO. Cualquier persona con el código puede ver el estado.
+    return this.ordersService.findByTrackingCode(code);
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string, @Query("userId") userId: string) {
     if (!userId) {
@@ -68,25 +74,5 @@ export class OrdersController {
       );
     }
     return this.ordersService.remove(id);
-  }
-
-  @Post(":id/confirm-payment")
-  async confirmPayment(
-    @Param("id") id: string,
-    @Query("userId") userId: string,
-  ) {
-    if (!userId) {
-      throw new ForbiddenException("userId es requerido como query parameter");
-    }
-    const order = await this.ordersService.findOne(id);
-    if (order.userId !== userId) {
-      throw new ForbiddenException(
-        "No tienes permiso para confirmar esta orden",
-      );
-    }
-    await this.ordersService.confirmPayment(id);
-    return {
-      message: "Pago confirmado, cambio de estado programado en 3 minutos",
-    };
   }
 }

@@ -16,6 +16,9 @@ export class Order {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({ type: "varchar", unique: true, nullable: true })
+  tracking_code: string;
+
   @Column({ type: "enum", enum: OrderStatus, default: OrderStatus.Pending })
   status: OrderStatus;
 
@@ -41,7 +44,10 @@ export class Order {
   updated_at: Date;
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
-  total_amount: number;    // monto que pagó — viene de MP
+  price: number;           // precio base enviado por el front
+
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+  total_amount: number;    // monto final a cobrar (con descuentos si aplican)
 
   @Column({ type: "varchar", nullable: true })
   preference_id: string;   // id de MP — relaciona el pago con la orden

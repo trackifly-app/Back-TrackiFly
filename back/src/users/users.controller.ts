@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserStatus } from '../common/enums/user-status.enum';
 
 @Controller('users')
@@ -36,18 +35,6 @@ export class UsersController {
     return this.usersService.getUserById(id);
   }
 
-  @Put(':id')
-  async updateUser(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateData: UpdateUserDto,
-  ) {
-    const updatedUser = await this.usersService.updateUser(id, updateData);
-    return {
-      message: 'Usuario actualizado exitosamente.',
-      user_id: updatedUser.id,
-    };
-  }
-
   @Delete(':id')
   async deleteUser(
     @Param('id', ParseUUIDPipe) id: string,
@@ -69,6 +56,17 @@ export class UsersController {
       message: `El estado del usuario ha sido actualizado correctamente.`,
       user_id: updatedUser.id,
       status: updatedUser.status,
+    };
+  }
+
+  @Put(':id/role-admin')
+  async makeAdmin(
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const updatedUser = await this.usersService.makeAdmin(id);
+    return {
+      message: 'El usuario ha sido promovido a administrador.',
+      user_id: updatedUser.id,
     };
   }
 }

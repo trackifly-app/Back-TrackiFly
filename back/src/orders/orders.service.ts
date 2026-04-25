@@ -6,8 +6,9 @@ import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersRepository } from "./orders.repository";
 
 const STATUS_SEQUENCE = [
-  OrderStatus.Pending,
+  OrderStatus.Paid,
   OrderStatus.Processing,
+  OrderStatus.Shipped,
   OrderStatus.Completed,
 ];
 
@@ -19,13 +20,12 @@ export class OrdersService {
 
   /**
    * Llama este método cuando el pago de la orden se confirme.
-   * Marca la orden para cambio automático de estado.
+   * El Webhook de MP ya marcó la orden como Paid,
+   * así que solo la registramos en el mapa para el cron job.
    */
   async confirmPayment(orderId: string) {
-    // Cambia el estado inicial a "pending"
-    await this.updateStatus(orderId, OrderStatus.Pending);
-
-    // Marca la orden para cambio automático (índice 0 = pending)
+    // El webhook ya cambió el estado a Paid, no lo revertimos.
+    // Solo marcamos la orden para que el cron la avance a partir de Paid (índice 0).
     this.ordersAwaitingStatusChange.set(orderId, 0);
   }
 
@@ -76,6 +76,12 @@ export class OrdersService {
   async findOne(id: string): Promise<any> {
     const order = await this.ordersRepository.findOrderById(id);
     if (!order) throw new NotFoundException("Order not found");
+    return order;
+  }
+
+  async findByTrackingCode(code: string): Promise<any> {
+    const order = await this.ordersRepository.findOrderByTrackingCode(code);
+    if (!order) throw new NotFoundException("Order with this tracking code not found");
     return order;
   }
 
