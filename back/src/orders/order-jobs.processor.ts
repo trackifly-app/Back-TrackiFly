@@ -1,3 +1,4 @@
+
 // --- COMENTADO TEMPORALMENTE: Job automático de cambio de estado ---
 /*
   @Process()
