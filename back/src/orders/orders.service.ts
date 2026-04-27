@@ -4,6 +4,8 @@ import { OrderStatus } from "../common/enums/order-status.enum";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersRepository } from "./orders.repository";
+import { CreateBulkOrderDto } from "./dto/create-bulk-order.dto";
+import { BulkOrdersResult } from "./interfaces/bulk-order-result.interface";
 
 const STATUS_SEQUENCE = [
   OrderStatus.Paid,
@@ -94,5 +96,45 @@ export class OrdersService {
   async remove(id: string): Promise<void> {
     const removed = await this.ordersRepository.removeOrder(id);
     if (!removed) throw new NotFoundException("Order not found");
+  }
+
+  /**
+   * Crea múltiples órdenes para una company en una sola operación
+   * 
+   * @param createBulkOrderDto - DTO con companyId y array de órdenes
+   * @returns Resultado con órdenes exitosas y errores
+   */
+  async createBulkOrders(
+    createBulkOrderDto: CreateBulkOrderDto,
+  ): Promise<BulkOrdersResult> {
+    const { companyId, orders, continueOnError } = createBulkOrderDto;
+
+    // Aquí iría la lógica para obtener el userId de la company
+    // Por ahora, asumimos que el companyId es válido
+    // En una implementación real, validarías la company y obtendrías su userId
+    
+    // TODO: Integrar con CompaniesService para obtener userId de company
+    // const company = await this.companiesService.getCompanyById(companyId);
+    // if (!company) throw new NotFoundException(`Company con id '${companyId}' no existe`);
+    // const userId = company.user.id;
+
+    // Placeholder: usar companyId como userId (en producción, obtener del service)
+    const userId = companyId;
+
+    console.log(`[BULK_ORDERS] Iniciando creación de ${orders.length} órdenes para company: ${companyId}`);
+
+    const result = await this.ordersRepository.createBulkOrders(
+      orders,
+      userId,
+      continueOnError,
+    );
+
+    result.companyId = companyId;
+
+    console.log(
+      `[BULK_ORDERS] Resultado: ${result.successCount}/${result.totalRequested} exitosas en ${result.duration}ms`,
+    );
+
+    return result;
   }
 }
