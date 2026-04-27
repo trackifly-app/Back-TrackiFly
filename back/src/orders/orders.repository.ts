@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { Order } from './entities/order.entity';
-import { OrderDetail } from './entities/order-detail.entity';
-import { Category } from '../categories/entities/category.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderStatus } from '../common/enums/order-status.enum';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { DataSource, Repository } from "typeorm";
+import { Order } from "./entities/order.entity";
+import { OrderDetail } from "./entities/order-detail.entity";
+import { Category } from "../categories/entities/category.entity";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { UpdateOrderDto } from "./dto/update-order.dto";
+import { OrderStatus } from "../common/enums/order-status.enum";
 
-import { CreatedOrderResult } from './interfaces/created-order-result.interface';
+import { CreatedOrderResult } from "./interfaces/created-order-result.interface";
 
 @Injectable()
 export class OrdersRepository extends Repository<Order> {
@@ -30,7 +30,8 @@ export class OrdersRepository extends Repository<Order> {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      const generatedCode = 'VLZ-2026-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+      const generatedCode =
+        "VLZ-2026-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
       // Primero creamos la orden con los datos del envío
       const order = manager.create(Order, {
@@ -46,11 +47,12 @@ export class OrdersRepository extends Repository<Order> {
 
       // Después creamos el detalle con los datos del paquete,
       // asociado a la orden que acabamos de guardar
-      const defaultImage = 'https://cdn-icons-png.flaticon.com/512/683/683030.png';
-      
+      const defaultImage =
+        "https://cdn-icons-png.flaticon.com/512/683/683030.png";
+
       const detail = manager.create(OrderDetail, {
         name: createOrderDto.name,
-        description: createOrderDto.description || '',
+        description: createOrderDto.description || "",
         image: createOrderDto.image || defaultImage,
         weight: createOrderDto.weight,
         height: createOrderDto.height,
@@ -93,7 +95,7 @@ export class OrdersRepository extends Repository<Order> {
 
   async findAllOrders(): Promise<any[]> {
     const orders = await this.find({
-      relations: ['user', 'details', 'details.category'],
+      relations: ["user", "details", "details.category"],
     });
     return orders.map((order) => this.mapOrderResponse(order));
   }
@@ -101,7 +103,7 @@ export class OrdersRepository extends Repository<Order> {
   async findOrderById(id: string): Promise<any | undefined> {
     const order = await this.findOne({
       where: { id },
-      relations: ['user', 'details', 'details.category'],
+      relations: ["user", "details", "details.category"],
     });
     return order ? this.mapOrderResponse(order) : undefined;
   }
@@ -109,7 +111,7 @@ export class OrdersRepository extends Repository<Order> {
   async findOrdersByUser(userId: string): Promise<any[]> {
     const orders = await this.find({
       where: { user: { id: userId } },
-      relations: ['user', 'details', 'details.category'],
+      relations: ["user", "details", "details.category"],
     });
     return orders.map((order) => this.mapOrderResponse(order));
   }
@@ -124,7 +126,6 @@ export class OrdersRepository extends Repository<Order> {
       delivery_direction: order.delivery_direction,
       distance: order.distance,
       price: order.price,
-      total_amount: order.total_amount,
       created_at: order.created_at,
       userId: order.user?.id,
       package: detail
@@ -144,7 +145,7 @@ export class OrdersRepository extends Repository<Order> {
             urgent: detail.urgent,
             dangerous: detail.dangerous,
             cooled: detail.cooled,
-            category: detail.category?.name || 'N/A',
+            category: detail.category?.name || "N/A",
           }
         : null,
     };
@@ -175,10 +176,12 @@ export class OrdersRepository extends Repository<Order> {
     return order ?? undefined;
   }
 
-  async findOrderByTrackingCode(trackingCode: string): Promise<any | undefined> {
+  async findOrderByTrackingCode(
+    trackingCode: string,
+  ): Promise<any | undefined> {
     const order = await this.findOne({
       where: { tracking_code: trackingCode },
-      relations: ['user', 'details', 'details.category'],
+      relations: ["user", "details", "details.category"],
     });
     return order ? this.mapOrderResponse(order) : undefined;
   }
