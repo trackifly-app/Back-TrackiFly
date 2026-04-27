@@ -99,7 +99,6 @@ export class PaymentsService {
     // También guardamos el monto final para tener registro de lo que se cobró
     await this.ordersRepository.update(order.id, {
       preference_id: response.id!,
-      total_amount: finalAmount,
     });
 
     // El front necesita la checkout_url para redirigir al usuario a pagar.

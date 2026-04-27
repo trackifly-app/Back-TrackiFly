@@ -12,6 +12,7 @@ import {
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import { CreateBulkOrderDto } from "./dto/create-bulk-order.dto";
 
 @Controller("orders")
 export class OrdersController {
@@ -20,6 +21,11 @@ export class OrdersController {
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto, createOrderDto.userId);
+  }
+
+  @Post("bulk")
+  async createBulk(@Body() createBulkOrderDto: CreateBulkOrderDto) {
+    return this.ordersService.createBulkOrders(createBulkOrderDto);
   }
 
   @Get()
