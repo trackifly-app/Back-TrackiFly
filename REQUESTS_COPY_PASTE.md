@@ -285,6 +285,343 @@ POST http://localhost:3000/auth/logout
 
 ---
 
+## PARTE 4.5: CREACIÓN MASIVA DE PEDIDOS (BULK ORDERS)
+
+### 18. CREAR MÚLTIPLES ÓRDENES DE UNA VEZ (Exitoso)
+
+```
+POST http://localhost:3000/orders/bulk
+Content-Type: application/json
+
+{
+  "companyId": "{{company_id}}",
+  "continueOnError": false,
+  "orders": [
+    {
+      "name": "Paquete A - Electrónica",
+      "category_id": "{{CATEGORIA_ID}}",
+      "description": "Laptop Dell XPS 13",
+      "pickup_direction": "Calle 123, Apartamento 4B, Buenos Aires",
+      "delivery_direction": "Avenida Libertad 456, Oficina 10, CABA",
+      "height": 35,
+      "width": 25,
+      "depth": 2,
+      "weight": 2.5,
+      "fragile": true,
+      "dangerous": false,
+      "cooled": false,
+      "urgent": true,
+      "unit": "cm",
+      "distance": 15.5,
+      "price": 450.0
+    },
+    {
+      "name": "Paquete B - Ropa",
+      "category_id": "{{CATEGORIA_ID}}",
+      "description": "Caja de ropa (15kg)",
+      "pickup_direction": "Centro comercial, local 42, Mendoza",
+      "delivery_direction": "Almacén retail, Zona 5, Mendoza",
+      "height": 40,
+      "width": 30,
+      "depth": 25,
+      "weight": 15,
+      "fragile": false,
+      "dangerous": false,
+      "cooled": false,
+      "urgent": false,
+      "unit": "cm",
+      "distance": 8.0,
+      "price": 120.0
+    },
+    {
+      "name": "Paquete C - Comida Refrigerada",
+      "category_id": "{{CATEGORIA_ID}}",
+      "description": "Contenedor con alimentos frescos",
+      "pickup_direction": "Mercado local, puesto 15, Córdoba",
+      "delivery_direction": "Restaurante gourmet, zona norte, Córdoba",
+      "height": 20,
+      "width": 20,
+      "depth": 15,
+      "weight": 8.5,
+      "fragile": false,
+      "dangerous": false,
+      "cooled": true,
+      "urgent": true,
+      "unit": "cm",
+      "distance": 5.2,
+      "price": 95.5
+    }
+  ]
+}
+```
+
+**Reemplazar:**
+
+- `{{company_id}}` con el ID de tu empresa
+- `{{CATEGORIA_ID}}` con un ID de categoría válido (del paso 2)
+
+**Respuesta Esperada (201 Created):**
+
+```json
+{
+  "companyId": "{{company_id}}",
+  "totalRequested": 3,
+  "successCount": 3,
+  "failureCount": 0,
+  "duration": 342,
+  "successful": [
+    {
+      "id": "uuid",
+      "tracking_code": "VLZ-1714240000000-ABC123",
+      "status": "pending",
+      "price": 450.0,
+      "packageDetails": { ... }
+    },
+    ...
+  ],
+  "errors": [],
+  "summary": {
+    "status": "success",
+    "percentage": 100,
+    "message": "3/3 órdenes creadas exitosamente en 342ms"
+  }
+}
+```
+
+---
+
+### 19. CREAR MÚLTIPLES ÓRDENES CON continueOnError (Resultado Parcial)
+
+**Uso:** Cuando algunos pedidos pueden fallar pero quieres guardar los que sí funcionan
+
+```
+POST http://localhost:3000/orders/bulk
+Content-Type: application/json
+
+{
+  "companyId": "{{company_id}}",
+  "continueOnError": true,
+  "orders": [
+    {
+      "name": "Paquete Válido",
+      "category_id": "{{CATEGORIA_ID_VALIDA}}",
+      "pickup_direction": "Ubicación A, Ciudad",
+      "delivery_direction": "Ubicación B, Ciudad",
+      "height": 30,
+      "width": 20,
+      "depth": 10,
+      "weight": 5,
+      "fragile": false,
+      "dangerous": false,
+      "cooled": false,
+      "urgent": false,
+      "unit": "cm",
+      "distance": 10,
+      "price": 100
+    },
+    {
+      "name": "Paquete con Categoría Inválida",
+      "category_id": "INVALID-UUID-XXXX",
+      "pickup_direction": "Ubicación C, Ciudad",
+      "delivery_direction": "Ubicación D, Ciudad",
+      "height": 30,
+      "width": 20,
+      "depth": 10,
+      "weight": 5,
+      "fragile": false,
+      "dangerous": false,
+      "cooled": false,
+      "urgent": false,
+      "unit": "cm",
+      "distance": 10,
+      "price": 100
+    },
+    {
+      "name": "Otro Paquete Válido",
+      "category_id": "{{CATEGORIA_ID_VALIDA}}",
+      "pickup_direction": "Ubicación E, Ciudad",
+      "delivery_direction": "Ubicación F, Ciudad",
+      "height": 25,
+      "width": 15,
+      "depth": 8,
+      "weight": 3,
+      "fragile": true,
+      "dangerous": false,
+      "cooled": false,
+      "urgent": false,
+      "unit": "cm",
+      "distance": 12,
+      "price": 150
+    }
+  ]
+}
+```
+
+**Respuesta Esperada (201 Created - Parcial):**
+
+```json
+{
+  "companyId": "{{company_id}}",
+  "totalRequested": 3,
+  "successCount": 2,
+  "failureCount": 1,
+  "duration": 215,
+  "successful": [ ... ],
+  "errors": [
+    {
+      "index": 1,
+      "orderData": { ... },
+      "error": "La categoría con id 'INVALID-UUID-XXXX' no existe",
+      "code": "CATEGORY_NOT_FOUND"
+    }
+  ],
+  "summary": {
+    "status": "partial",
+    "percentage": 67,
+    "message": "2/3 órdenes creadas exitosamente en 215ms"
+  }
+}
+```
+
+**Nota:** Las 2 órdenes válidas se crean, la inválida se registra en `errors`
+
+---
+
+### 20. CREAR 10 ÓRDENES (Caso de Uso Real)
+
+```
+POST http://localhost:3000/orders/bulk
+Content-Type: application/json
+
+{
+  "companyId": "{{company_id}}",
+  "continueOnError": true,
+  "orders": [
+    {
+      "name": "Pedido 1 - Electrónica",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 1, Calle 50, Bogotá",
+      "height": 30, "width": 20, "depth": 10,
+      "weight": 5, "fragile": false, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 10, "price": 100
+    },
+    {
+      "name": "Pedido 2 - Ropa",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 2, Calle 60, Bogotá",
+      "height": 25, "width": 15, "depth": 8,
+      "weight": 3, "fragile": false, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 12, "price": 150
+    },
+    {
+      "name": "Pedido 3 - Alimentos",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 3, Calle 70, Bogotá",
+      "height": 20, "width": 20, "depth": 15,
+      "weight": 8, "fragile": false, "dangerous": false,
+      "cooled": true, "urgent": true, "unit": "cm",
+      "distance": 8, "price": 200
+    },
+    {
+      "name": "Pedido 4",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 4, Calle 80, Bogotá",
+      "height": 35, "width": 25, "depth": 10,
+      "weight": 6, "fragile": true, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 15, "price": 180
+    },
+    {
+      "name": "Pedido 5",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 5, Calle 90, Bogotá",
+      "height": 28, "width": 18, "depth": 12,
+      "weight": 4, "fragile": false, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 11, "price": 95
+    },
+    {
+      "name": "Pedido 6",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 6, Calle 100, Bogotá",
+      "height": 32, "width": 22, "depth": 9,
+      "weight": 7, "fragile": false, "dangerous": true,
+      "cooled": false, "urgent": true, "unit": "cm",
+      "distance": 20, "price": 250
+    },
+    {
+      "name": "Pedido 7",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 7, Calle 110, Bogotá",
+      "height": 24, "width": 16, "depth": 11,
+      "weight": 2, "fragile": true, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 9, "price": 75
+    },
+    {
+      "name": "Pedido 8",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 8, Calle 120, Bogotá",
+      "height": 40, "width": 30, "depth": 20,
+      "weight": 15, "fragile": false, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 18, "price": 350
+    },
+    {
+      "name": "Pedido 9",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 9, Calle 130, Bogotá",
+      "height": 22, "width": 14, "depth": 7,
+      "weight": 1, "fragile": false, "dangerous": false,
+      "cooled": false, "urgent": false, "unit": "cm",
+      "distance": 6, "price": 50
+    },
+    {
+      "name": "Pedido 10",
+      "category_id": "{{CATEGORIA_ID}}",
+      "pickup_direction": "Depósito Central, Bogotá",
+      "delivery_direction": "Cliente 10, Calle 140, Bogotá",
+      "height": 38, "width": 28, "depth": 13,
+      "weight": 10, "fragile": false, "dangerous": false,
+      "cooled": true, "urgent": true, "unit": "cm",
+      "distance": 14, "price": 220
+    }
+  ]
+}
+```
+
+**Respuesta Esperada (201 Created):**
+
+- 10 órdenes creadas en ~100-150ms
+- `duration`: ~150
+- `percentage`: 100
+- `message`: "10/10 órdenes creadas exitosamente en 150ms"
+
+---
+
+### 21. OBTENER TODAS LAS ÓRDENES CREADAS POR BULK
+
+Después de crear órdenes con bulk, puedes obtenerlas con:
+
+```
+GET http://localhost:3000/orders?userId={{user_id}}
+```
+
+**Verás todas las órdenes** (incluyendo las creadas por bulk)
+
+---
+
 ## PARTE 5: FLUJO DE EMPRESA
 
 ### 18. REGISTRAR EMPRESA
