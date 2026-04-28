@@ -88,7 +88,6 @@ export class PaymentsService {
 
     await this.ordersRepository.update(order.id, {
       preference_id: response.id!,
-      total_amount: finalAmount,
     });
 
     return {

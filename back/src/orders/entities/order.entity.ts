@@ -46,9 +46,6 @@ export class Order {
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   price: number;           // precio base enviado por el front
 
-  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
-  total_amount: number;    // monto final a cobrar (con descuentos si aplican)
-
   @Column({ type: "varchar", nullable: true })
   preference_id: string;   // id de MP — relaciona el pago con la orden
 }
