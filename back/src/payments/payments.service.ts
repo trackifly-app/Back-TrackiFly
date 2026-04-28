@@ -112,8 +112,10 @@ export class PaymentsService {
       status?: string;
     };
 
+    console.log('Respuesta completa de MP:', JSON.stringify(payment, null, 2))
     const preferenceId = payment.preference_id;
     const status = payment.status;
+
 
      console.log('Preference ID recibido:', preferenceId);
   console.log('Status del pago:', status);
