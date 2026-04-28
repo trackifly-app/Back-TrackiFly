@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verifica tu cuenta — TrackiFly</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+          
+          <!-- Header con logo -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#FF9D00 0%,#FF4D00 100%);padding:32px 40px;text-align:center;">
+              <img
+                src="https://res.cloudinary.com/demo/image/upload/v1/trackilfy-logo-placeholder.png"
+                alt="TrackiFly"
+                width="160"
+                style="display:inline-block;"
+              />
+              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;font-weight:600;letter-spacing:-0.5px;">
+                Verificación de Cuenta
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Cuerpo -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 16px;">
+                ¡Hola! 👋
+              </p>
+              <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 24px;">
+                Gracias por registrarte en <strong>TrackiFly</strong>. Para activar tu cuenta, ingresa el siguiente código de verificación:
+              </p>
+
+              <!-- Código OTP -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <div style="background:#FFF5EB;border:2px dashed #FF6B00;border-radius:12px;padding:24px 40px;display:inline-block;">
+                      <span style="font-size:36px;font-weight:700;letter-spacing:12px;color:#FF6B00;font-family:'Courier New',monospace;">
+                        <%= code %>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:24px 0 0;text-align:center;">
+                ⏱️ Este código es válido por <strong><%= expirationMinutes %> minutos</strong>.
+              </p>
+              <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:8px 0 0;text-align:center;">
+                Si no solicitaste esta verificación, puedes ignorar este correo de forma segura.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f9fafb;padding:24px 40px;border-top:1px solid #e5e7eb;">
+              <p style="color:#9ca3af;font-size:12px;line-height:1.5;margin:0;text-align:center;">
+                © <%= year %> TrackiFly. Todos los derechos reservados.<br/>
+                Este es un correo automático, por favor no respondas a este mensaje.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

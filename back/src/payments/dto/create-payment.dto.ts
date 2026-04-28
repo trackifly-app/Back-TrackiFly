@@ -4,4 +4,8 @@ export class CreatePaymentDto {
   @IsNotEmpty({ message: 'El ID de la orden es requerido' })
   @IsUUID('4', { message: 'El ID de la orden debe ser un UUID válido' })
   orderId: string;
+
+  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
+  @IsUUID('4', { message: 'El ID del usuario debe ser un UUID válido' })
+  userId: string;
 }
