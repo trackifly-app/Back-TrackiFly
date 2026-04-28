@@ -5,9 +5,9 @@ import { Company } from '../companies/entities/company.entity';
 import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './types/register-dto.type';
 import { Role } from '../common/enums/role.enum';
-import { RegisterUserDto } from './dtos/register-user.dto';
-import { RegisterCompanyDto } from './dtos/register-company.dto';
-import { RegisterOperatorDto } from './dtos/register-operator.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { RegisterCompanyDto } from './dto/register-company.dto';
+import { RegisterOperatorDto } from './dto/register-operator.dto';
 import { Gender } from '../common/enums/gender.enum';
 
 type ProfileHandler = (dto: RegisterDto, user: User, manager: EntityManager) => Promise<void>;

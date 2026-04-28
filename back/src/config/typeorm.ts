@@ -1,7 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { environment } from './environment';
-import { DataSource } from 'typeorm';
-import { DataSourceOptions } from 'typeorm/browser';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
 const config = {
   type: 'postgres',
