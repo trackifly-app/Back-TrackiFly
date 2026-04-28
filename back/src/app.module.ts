@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { ScheduleModule } from "@nestjs/schedule";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { typeOrmConfig } from "./config/typeorm";
@@ -26,6 +27,7 @@ import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 import { PaymentsModule } from "./payments/payments.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -55,7 +57,9 @@ import { PaymentsModule } from "./payments/payments.module";
     CategoriesModule,
     CloudinaryModule,
     PaymentsModule,
+    NotificationsModule,
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
