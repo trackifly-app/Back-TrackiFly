@@ -81,16 +81,9 @@ export class AuthController {
     return req.user; // devuelve { id, role, status }
   }
 
-  @UseGuards(AuthGuard)
   @Post('register-operator')
-  @ApiOperation({ summary: 'Registrar operador (solo empresas)' })
-  async registerOperator(
-    @Req() req: Request & { user: { id: string; role: Role; status: string } }, 
-    @Body() dto: RegisterOperatorDto) {
-    if (req.user.role !== Role.Company) {
-      throw new ForbiddenException('Solo empresas pueden registrar operadores');
-    }
-    const id = await this.authService.registerOperator(dto, req.user.id);
+  async registerOperator(@Body() dto: RegisterOperatorDto) {
+    const id = await this.authService.registerOperator(dto, dto.companyId);
     return { message: 'Operador registrado exitosamente.', user_id: id };
   }
 
