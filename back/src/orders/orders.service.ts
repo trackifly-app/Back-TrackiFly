@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, Inject, forwardRef } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { OrderStatus } from "../common/enums/order-status.enum";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import { CreateBulkOrderDto } from "./dto/create-bulk-order.dto";   
+import { BulkOrdersResult } from "./interfaces/bulk-order-result.interface";  
 import { OrdersRepository } from "./orders.repository";
-import { CreateBulkOrderDto } from "./dto/create-bulk-order.dto";
-import { BulkOrdersResult } from "./interfaces/bulk-order-result.interface";
+import { PaymentsService } from "../payments/payments.service";
+
 
 const STATUS_SEQUENCE = [
   OrderStatus.Paid,
@@ -18,22 +20,16 @@ const STATUS_SEQUENCE = [
 export class OrdersService {
   private ordersAwaitingStatusChange: Map<string, number> = new Map();
 
-  constructor(private readonly ordersRepository: OrdersRepository) {}
+  constructor(
+    private readonly ordersRepository: OrdersRepository,
+    @Inject(forwardRef(() => PaymentsService)) private readonly payments: PaymentsService
+  ) {}
 
-  /**
-   * Llama este método cuando el pago de la orden se confirme.
-   * El Webhook de MP ya marcó la orden como Paid,
-   * así que solo la registramos en el mapa para el cron job.
-   */
   async confirmPayment(orderId: string) {
-    // El webhook ya cambió el estado a Paid, no lo revertimos.
-    // Solo marcamos la orden para que el cron la avance a partir de Paid (índice 0).
+
     this.ordersAwaitingStatusChange.set(orderId, 0);
   }
 
-  /**
-   * Task programada cada 3 minutos para cambiar estados automáticamente
-   */
   @Cron("*/3 * * * *")
   async handleOrderStatusChange() {
     const ordersToProcess = Array.from(
@@ -64,7 +60,26 @@ export class OrdersService {
   }
 
   async create(createOrderDto: CreateOrderDto, userId: string): Promise<any> {
-    return await this.ordersRepository.createOrder(createOrderDto, userId);
+    const order = await this.ordersRepository.createOrder(createOrderDto, userId);
+
+    try {
+      const paymentResponse = await this.payments.createPreference({
+        orderId: order.id,
+        userId: userId,
+      });
+
+      return {
+        ...order,
+        paymentUrl: paymentResponse.checkout_url,
+        preferenceId: paymentResponse.preference_id,
+      };
+    } catch (error) {
+      console.error("Error creating Mercado Pago preference:", error);
+      return {
+        ...order,
+        paymentError: "No se pudo generar el link de pago en este momento",
+      };
+    }
   }
 
   async findAll(): Promise<any[]> {
