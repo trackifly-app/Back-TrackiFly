@@ -3,8 +3,11 @@ import { Cron } from "@nestjs/schedule";
 import { OrderStatus } from "../common/enums/order-status.enum";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import { CreateBulkOrderDto } from "./dto/create-bulk-order.dto";   
+import { BulkOrdersResult } from "./interfaces/bulk-order-result.interface";  
 import { OrdersRepository } from "./orders.repository";
 import { PaymentsService } from "../payments/payments.service";
+
 
 const STATUS_SEQUENCE = [
   OrderStatus.Paid,
