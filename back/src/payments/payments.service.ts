@@ -115,10 +115,14 @@ export class PaymentsService {
     const preferenceId = payment.preference_id;
     const status = payment.status;
 
+     console.log('Preference ID recibido:', preferenceId);
+  console.log('Status del pago:', status);
+
     if (!preferenceId) return { received: true };
 
     const order =
       await this.ordersRepository.findOrderByPreferenceId(preferenceId);
+      console.log('Orden encontrada:', order);
     if (!order) return { received: true };
 
     if (status === "approved") {
