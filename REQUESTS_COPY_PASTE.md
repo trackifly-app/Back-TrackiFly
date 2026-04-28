@@ -655,6 +655,7 @@ Content-Type: application/json
 PUT http://localhost:3000/users/{{company_user_id}}/status
 Content-Type: application/json
 
+89865625-0c0c-4b5c-8451-8b839fee56e8
 {
   "status": "APPROVED"
 }
@@ -750,6 +751,206 @@ Content-Type: application/json
 - `PENDING` - Pendiente de aprobación
 - `APPROVED` - Aprobado (puede usar la plataforma)
 - `REJECTED` - Rechazado (no puede usar la plataforma)
+
+---
+
+## PARTE 7: DASHBOARD DE REPORTES (ADMIN)
+
+### 27. OBTENER REPORTES POR FILTRO (1h | 1d | 7d | 1m | historic)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=1d
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Parámetros query disponibles:**
+
+- `filter=1h` → Datos por minutos (12 intervalos de 5 min)
+- `filter=1d` → Datos por horas (24 horas) - **DEFAULT**
+- `filter=7d` → Datos por días (7 días)
+- `filter=1m` → Datos por días (30 días)
+- `filter=historic` → Datos por meses (historial completo)
+
+---
+
+### Ejemplo: Filtro 1h (por minutos)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=1h
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Respuesta esperada (200 OK):**
+
+```json
+{
+  "totalUsers": 15,
+  "previousUsers": 12,
+  "totalCompanies": 3,
+  "previousCompanies": 2,
+  "orders": {
+    "delivered": 8,
+    "started": 5,
+    "canceled": 2
+  },
+  "previousOrders": {
+    "delivered": 6,
+    "started": 3,
+    "canceled": 1
+  },
+  "usersPerPeriod": [0, 1, 2, 1, 0, 2, 3, 1, 2, 1, 1, 0],
+  "companiesPerPeriod": [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+  "labels": ["00:00", "00:05", "00:10", "00:15", "00:20", "00:25", "00:30", "00:35", "00:40", "00:45", "00:50", "00:55"]
+}
+```
+
+---
+
+### Ejemplo: Filtro 1d (por horas)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=1d
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Respuesta esperada (200 OK):**
+
+```json
+{
+  "totalUsers": 45,
+  "previousUsers": 38,
+  "totalCompanies": 8,
+  "previousCompanies": 6,
+  "orders": {
+    "delivered": 23,
+    "started": 15,
+    "canceled": 5
+  },
+  "previousOrders": {
+    "delivered": 18,
+    "started": 12,
+    "canceled": 3
+  },
+  "usersPerPeriod": [2, 1, 0, 3, 5, 2, 1, 4, 3, 2, 1, 5, 2, 1, 3, 2, 1, 2, 3, 2, 1, 2, 1, 0],
+  "companiesPerPeriod": [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+  "labels": ["00h", "01h", "02h", "03h", "04h", "05h", "06h", "07h", "08h", "09h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h"]
+}
+```
+
+---
+
+### Ejemplo: Filtro 7d (por días)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=7d
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Respuesta esperada (200 OK):**
+
+```json
+{
+  "totalUsers": 127,
+  "previousUsers": 98,
+  "totalCompanies": 18,
+  "previousCompanies": 14,
+  "orders": {
+    "delivered": 64,
+    "started": 32,
+    "canceled": 12
+  },
+  "previousOrders": {
+    "delivered": 48,
+    "started": 24,
+    "canceled": 8
+  },
+  "usersPerPeriod": [15, 18, 12, 20, 25, 18, 19],
+  "companiesPerPeriod": [2, 2, 3, 2, 4, 2, 3],
+  "labels": ["24/04", "25/04", "26/04", "27/04", "28/04", "29/04", "30/04"]
+}
+```
+
+---
+
+### Ejemplo: Filtro 1m (por días, 30 días)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=1m
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Respuesta esperada (200 OK):**
+
+```json
+{
+  "totalUsers": 325,
+  "previousUsers": 287,
+  "totalCompanies": 52,
+  "previousCompanies": 46,
+  "orders": {
+    "delivered": 178,
+    "started": 95,
+    "canceled": 32
+  },
+  "previousOrders": {
+    "delivered": 156,
+    "started": 84,
+    "canceled": 28
+  },
+  "usersPerPeriod": [10, 12, 8, 15, 18, 14, 16, 12, 11, 13, 15, 10, 12, 14, 16, 13, 11, 10, 12, 15, 14, 13, 12, 11, 10, 14, 16, 15, 13, 12],
+  "companiesPerPeriod": [1, 1, 2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1],
+  "labels": ["29/03", "30/03", "31/03", "01/04", "02/04", "03/04", "04/04", "05/04", "06/04", "07/04", "08/04", "09/04", "10/04", "11/04", "12/04", "13/04", "14/04", "15/04", "16/04", "17/04", "18/04", "19/04", "20/04", "21/04", "22/04", "23/04", "24/04", "25/04", "26/04", "27/04"]
+}
+```
+
+---
+
+### Ejemplo: Filtro historic (por meses - todo el historial)
+
+```
+GET http://localhost:3000/api/admin/reportes?filter=historic
+Authorization: Bearer {{ADMIN_TOKEN}}
+```
+
+**Respuesta esperada (200 OK):**
+
+```json
+{
+  "totalUsers": 2150,
+  "previousUsers": 0,
+  "totalCompanies": 312,
+  "previousCompanies": 0,
+  "orders": {
+    "delivered": 1245,
+    "started": 645,
+    "canceled": 198
+  },
+  "previousOrders": {
+    "delivered": 0,
+    "started": 0,
+    "canceled": 0
+  },
+  "usersPerPeriod": [45, 67, 78, 92, 105, 118, 142, 156, 178, 195, 208, 216, 225, 242, 258, 275, 298, 312, 325, 340, 352, 367, 380, 395, 412, 428, 445, 468, 492, 510],
+  "companiesPerPeriod": [5, 8, 12, 15, 18, 22, 28, 32, 38, 42, 48, 52, 56, 62, 68, 74, 82, 88, 95, 102, 108, 115, 122, 130, 138, 145, 155, 165, 175, 185],
+  "labels": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic", "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic", "ene", "feb", "mar", "abr", "may", "jun"]
+}
+```
+
+---
+
+**Descripción de campos en la respuesta:**
+
+- `totalUsers` → Cantidad de usuarios registrados en el período
+- `previousUsers` → Cantidad de usuarios en el período anterior (para calcular variación)
+- `totalCompanies` → Cantidad de empresas registradas en el período
+- `previousCompanies` → Cantidad de empresas en el período anterior
+- `orders.delivered` → Órdenes entregadas en el período
+- `orders.started` → Órdenes iniciadas en el período
+- `orders.canceled` → Órdenes canceladas en el período
+- `previousOrders.*` → Mismo pero para el período anterior
+- `usersPerPeriod[]` → Array de usuarios por cada intervalo (para gráfico)
+- `companiesPerPeriod[]` → Array de empresas por cada intervalo (para gráfico)
+- `labels[]` → Etiquetas del eje X (dinámicas según filtro seleccionado)
 
 ---
 

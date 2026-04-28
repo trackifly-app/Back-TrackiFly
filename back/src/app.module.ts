@@ -26,6 +26,7 @@ import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 import { PaymentsModule } from "./payments/payments.module";
+import { ReportsModule } from "./reports/reports.module";
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { PaymentsModule } from "./payments/payments.module";
     CategoriesModule,
     CloudinaryModule,
     PaymentsModule,
+    ReportsModule,
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
