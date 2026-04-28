@@ -2,6 +2,55 @@
 
 **Nota:** Reemplaza los valores entre `{{...}}` con valores reales
 
+## BASE URL
+
+| Entorno    | URL                                           |
+| ---------- | --------------------------------------------- |
+| Local      | `http://localhost:3000`                       |
+| Producción | `https://back-production-xxxx.up.railway.app` |
+
+> El archivo usa `localhost:3000`. Para probar producción, reemplazá con la URL de Railway.
+
+## ÍNDICE DE ENDPOINTS
+
+| #   | Método | Ruta                           | Descripción                      |
+| --- | ------ | ------------------------------ | -------------------------------- |
+| 1   | GET    | /                              | Health Check                     |
+| 2   | GET    | /categories                    | Obtener todas las categorías     |
+| 2.5 | GET    | /categories/:id                | Obtener una categoría específica |
+| 3   | POST   | /auth/signup/user              | Registrar usuario                |
+| 4   | POST   | /auth/signin                   | Login                            |
+| 5   | GET    | /auth/me                       | Obtener mi información           |
+| 5.5 | POST   | /auth/google                   | Autenticación con Google         |
+| 6   | GET    | /profiles/user/:id             | Obtener perfil                   |
+| 7   | PUT    | /profiles/user/:id             | Actualizar perfil                |
+| 8   | PUT    | /profiles/user/:id/image       | Subir foto de perfil             |
+| 9   | POST   | /orders                        | Crear orden                      |
+| 10  | GET    | /orders?userId=                | Obtener mis órdenes              |
+| 11  | GET    | /orders/:id                    | Obtener una orden por ID         |
+| 12  | PATCH  | /orders/:id                    | Actualizar orden                 |
+| 13  | GET    | /orders/track/:tracking_code   | Rastreo público                  |
+| 14  | DELETE | /orders/:id                    | Eliminar orden                   |
+| 15  | POST   | /auth/logout                   | Logout                           |
+| 16  | POST   | /orders/bulk                   | Crear múltiples órdenes (bulk)   |
+| 17  | POST   | /orders/bulk                   | Bulk con continueOnError         |
+| 18  | POST   | /orders/bulk                   | Bulk 10 órdenes (caso real)      |
+| 19  | GET    | /orders?userId=                | Ver órdenes creadas por bulk     |
+| 20  | POST   | /mercadopago/create-preference | Iniciar pago MercadoPago         |
+| 21  | POST   | /mercadopago/webhook           | Webhook MercadoPago (simulación) |
+| 22  | POST   | /auth/signup/company           | Registrar empresa                |
+| 23  | PUT    | /users/:id/status              | Aprobar/rechazar empresa         |
+| 24  | GET    | /companies/user/:id            | Obtener datos de empresa         |
+| 25  | POST   | /auth/signin                   | Login empresa                    |
+| 26  | POST   | /auth/register-operator        | Registrar operador               |
+| 27  | PUT    | /companies/user/:id            | Actualizar datos empresa         |
+| 28  | PUT    | /companies/user/:id/image      | Subir logo empresa               |
+| 29  | PUT    | /users/:id/role-admin          | Promover a administrador         |
+| 30  | GET    | /users?page=&limit=            | Obtener todos los usuarios       |
+| 31  | GET    | /users/:id                     | Obtener un usuario específico    |
+| 32  | DELETE | /users/:id                     | Eliminar usuario (lógico)        |
+| 33  | PUT    | /users/:id/status              | Cambiar estado de usuario        |
+
 ---
 
 ## PARTE 1: SETUP INICIAL
@@ -22,6 +71,16 @@ GET http://localhost:3000/categories
 
 - `id` - Copiar uno de estos para usar en órdenes
 - `name` - Nombre de la categoría
+
+---
+
+### 2.5. Obtener Una Categoría Específica
+
+```
+GET http://localhost:3000/categories/{{category_id}}
+```
+
+**Reemplazar:** `{{category_id}}` con el ID de una categoría del paso 2
 
 ---
 
@@ -64,7 +123,7 @@ Content-Type: application/json
 
 **Respuesta:**
 
-- Devuelve mensaje "Usuario Logeado"
+- Devuelve mensaje "Sesión iniciada exitosamente"
 - ⚠️ La cookie se envía automáticamente (toma nota en Postman/Thunder Client si quieres guardar el token)
 
 ---
@@ -81,6 +140,39 @@ O si tienes la cookie:
 ```
 GET http://localhost:3000/auth/me
 ```
+
+**Respuesta incluye:**
+
+- `id` - Tu user_id
+- `role` - Tu rol (user, company, admin, operator, superadmin)
+- `status` - Tu estado (PENDING, APPROVED, REJECTED)
+
+---
+
+### 5.5. AUTENTICACIÓN CON GOOGLE (Alternativa)
+
+```
+POST http://localhost:3000/auth/google
+Content-Type: application/json
+
+{
+  "email": "usuario@gmail.com",
+  "name": "Juan Pérez",
+  "googleId": "1234567890.apps.googleusercontent.com",
+  "picture": "https://lh3.googleusercontent.com/a/default-user"
+}
+```
+
+**Respuesta:**
+
+```json
+{
+  "message": "Autenticación exitosa",
+  "isNew": true
+}
+```
+
+**Nota:** Si `isNew` es true, significa que se creó un nuevo usuario. La cookie se envía automáticamente.
 
 ---
 
@@ -104,7 +196,12 @@ Content-Type: application/json
 
 {
   "first_name": "Juan Carlos",
-  "phone": "3009876543"
+  "last_name": "Pérez García",
+  "birthdate": "1990-05-15",
+  "gender": "male",
+  "address": "Calle Nueva 456",
+  "phone": "3009876543",
+  "country": "CO"
 }
 ```
 
@@ -126,6 +223,15 @@ image: [selecciona un archivo JPG/PNG]
 1. Cambiar Body a "form-data"
 2. Clave: "image", Tipo: "File"
 3. Seleccionar archivo de tu computadora
+
+**Respuesta:**
+
+```json
+{
+  "message": "Imagen actualizada correctamente",
+  "url": "https://res.cloudinary.com/..."
+}
+```
 
 ---
 
@@ -154,7 +260,8 @@ Content-Type: application/json
   "dangerous": false,
   "urgent": false,
   "unit": "cm",
-  "distance": 15.5
+  "distance": 15.5,
+  "price": 125.50
 }
 ```
 
@@ -163,11 +270,11 @@ Content-Type: application/json
 - `{{user_id}}` con el ID del usuario que guardaste en paso 3
 - `{{CATEGORIA_ID}}` con un ID de categoría del paso 2
 
-**Guardar:** `id` de la respuesta para los siguientes pasos
+**Guardar:** `id` (order_id) y `tracking_code` de la respuesta para los siguientes pasos
 
 ---
 
-### 10. OBTENER MIS ÓRDENES (sin token necesario)
+### 10. OBTENER MIS ÓRDENES
 
 ```
 GET http://localhost:3000/orders?userId={{user_id}}
@@ -177,7 +284,7 @@ GET http://localhost:3000/orders?userId={{user_id}}
 
 ---
 
-### 11. OBTENER UNA ORDEN POR ID (sin token necesario)
+### 11. OBTENER UNA ORDEN POR ID
 
 ```
 GET http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
@@ -190,7 +297,7 @@ GET http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
 
 ---
 
-### 12. ACTUALIZAR ORDEN (sin token necesario)
+### 12. ACTUALIZAR ORDEN
 
 ```
 PATCH http://localhost:3000/orders/{{order_id}}
@@ -200,7 +307,8 @@ Content-Type: application/json
   "userId": "{{user_id}}",
   "name": "Paquete de electrónica - URGENTE",
   "urgent": true,
-  "weight": 9
+  "weight": 9,
+  "price": 150.00
 }
 ```
 
@@ -209,52 +317,11 @@ Content-Type: application/json
 - `{{order_id}}` con el ID de la orden
 - `{{user_id}}` con tu ID de usuario
 
-**Nota:** Solo envía los campos que quieres cambiar
+**Nota:** Solo envía los campos que quieres cambiar. Todos son opcionales.
 
 ---
 
-### 13. INICIAR PAGO CON MERCADOPAGO (Requiere Token)
-
-```
-POST http://localhost:3000/mercadopago/create-preference
-Authorization: Bearer {{TOKEN_AQUI}}
-Content-Type: application/json
-
-{
-  "orderId": "{{order_id}}"
-}
-```
-
-**Reemplazar:**
-
-- `{{TOKEN_AQUI}}` con tu JWT token del paso 4 (Login)
-- `{{order_id}}` con el ID de la orden creada
-
-**Respuesta Esperada:**
-
-- Te devuelve un `checkout_url`. Abre esa URL en tu navegador para simular el pago real en el sandbox de MercadoPago.
-
----
-
-### 14. SIMULAR WEBHOOK DE MERCADOPAGO (Alternativa manual si no pagaste arriba)
-
-```
-POST http://localhost:3000/mercadopago/webhook
-Content-Type: application/json
-
-{
-  "type": "payment",
-  "data": {
-    "id": "123456789"
-  }
-}
-```
-
-**Nota:** Esto simula que MercadoPago avisó que el pago se hizo. El backend buscará la orden asociada y activará el cambio de estado automático (Cron Job).
-
----
-
-### 15. RASTREO PÚBLICO (No requiere token ni userId)
+### 13. RASTREO PÚBLICO (Sin autenticación requerida)
 
 ```
 GET http://localhost:3000/orders/track/{{tracking_code}}
@@ -262,9 +329,11 @@ GET http://localhost:3000/orders/track/{{tracking_code}}
 
 **Reemplazar:** `{{tracking_code}}` con el código tipo `VLZ-2026-XXXXXX` que obtuviste al crear la orden.
 
+**Nota:** Este endpoint es público, cualquiera con el código de rastreo puede ver el estado de la orden.
+
 ---
 
-### 16. ELIMINAR ORDEN (sin token necesario)
+### 14. ELIMINAR ORDEN
 
 ```
 DELETE http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
@@ -277,7 +346,7 @@ DELETE http://localhost:3000/orders/{{order_id}}?userId={{user_id}}
 
 ---
 
-### 17. LOGOUT
+### 15. LOGOUT
 
 ```
 POST http://localhost:3000/auth/logout
@@ -285,9 +354,9 @@ POST http://localhost:3000/auth/logout
 
 ---
 
-## PARTE 4.5: CREACIÓN MASIVA DE PEDIDOS (BULK ORDERS)
+## PARTE 5: CREACIÓN MASIVA DE PEDIDOS (BULK ORDERS)
 
-### 18. CREAR MÚLTIPLES ÓRDENES DE UNA VEZ (Exitoso)
+### 16. CREAR MÚLTIPLES ÓRDENES DE UNA VEZ (Exitoso)
 
 ```
 POST http://localhost:3000/orders/bulk
@@ -390,7 +459,7 @@ Content-Type: application/json
 
 ---
 
-### 19. CREAR MÚLTIPLES ÓRDENES CON continueOnError (Resultado Parcial)
+### 17. CREAR MÚLTIPLES ÓRDENES CON continueOnError (Resultado Parcial)
 
 **Uso:** Cuando algunos pedidos pueden fallar pero quieres guardar los que sí funcionan
 
@@ -487,7 +556,7 @@ Content-Type: application/json
 
 ---
 
-### 20. CREAR 10 ÓRDENES (Caso de Uso Real)
+### 18. CREAR 10 ÓRDENES (Caso de Uso Real)
 
 ```
 POST http://localhost:3000/orders/bulk
@@ -610,7 +679,7 @@ Content-Type: application/json
 
 ---
 
-### 21. OBTENER TODAS LAS ÓRDENES CREADAS POR BULK
+### 19. OBTENER TODAS LAS ÓRDENES CREADAS POR BULK
 
 Después de crear órdenes con bulk, puedes obtenerlas con:
 
@@ -622,9 +691,58 @@ GET http://localhost:3000/orders?userId={{user_id}}
 
 ---
 
-## PARTE 5: FLUJO DE EMPRESA
+## PARTE 6: PAGOS Y MERCADOPAGO
 
-### 18. REGISTRAR EMPRESA
+### 20. INICIAR PAGO CON MERCADOPAGO
+
+```
+POST http://localhost:3000/mercadopago/create-preference
+Content-Type: application/json
+
+{
+  "orderId": "{{order_id}}",
+  "userId": "{{user_id}}"
+}
+```
+
+**Reemplazar:**
+
+- `{{order_id}}` con el ID de la orden creada
+- `{{user_id}}` con tu ID de usuario
+
+**Nota:** Si tienes un token válido, puedes usar:
+
+```
+Authorization: Bearer {{TOKEN_AQUI}}
+```
+
+**Respuesta Esperada:**
+
+- Te devuelve un `checkout_url`. Abre esa URL en tu navegador para simular el pago real en el sandbox de MercadoPago.
+
+---
+
+### 21. WEBHOOK DE MERCADOPAGO (Simulación manual)
+
+```
+POST http://localhost:3000/mercadopago/webhook
+Content-Type: application/json
+
+{
+  "type": "payment",
+  "data": {
+    "id": "123456789"
+  }
+}
+```
+
+**Nota:** Esto simula que MercadoPago notificó que el pago se hizo. El backend buscará la orden asociada y activará el cambio de estado automático.
+
+---
+
+## PARTE 7: FLUJO DE EMPRESA
+
+### 22. REGISTRAR EMPRESA
 
 ```
 POST http://localhost:3000/auth/signup/company
@@ -649,7 +767,7 @@ Content-Type: application/json
 
 ---
 
-### 19. CAMBIAR ESTADO DE EMPRESA A APPROVED (REQUIERE CREDENCIALES DE ADMIN)
+### 23. CAMBIAR ESTADO DE EMPRESA A APPROVED (REQUIERE CREDENCIALES DE ADMIN)
 
 ```
 PUT http://localhost:3000/users/{{company_user_id}}/status
@@ -660,11 +778,11 @@ Content-Type: application/json
 }
 ```
 
-**Reemplazar:** `{{company_user_id}}` con el ID de la empresa (paso 18)
+**Reemplazar:** `{{company_user_id}}` con el ID de la empresa (paso 22)
 
 ---
 
-### 20. EMPRESA: OBTENER DATOS
+### 24. EMPRESA: OBTENER DATOS
 
 ```
 GET http://localhost:3000/companies/user/{{company_user_id}}
@@ -672,7 +790,7 @@ GET http://localhost:3000/companies/user/{{company_user_id}}
 
 ---
 
-### 21. EMPRESA: LOGIN (después de ser aprobada)
+### 25. EMPRESA: LOGIN (después de ser aprobada)
 
 ```
 POST http://localhost:3000/auth/signin
@@ -686,11 +804,10 @@ Content-Type: application/json
 
 ---
 
-### 22. EMPRESA: REGISTRAR OPERADOR
+### 26. EMPRESA: REGISTRAR OPERADOR
 
 ```
 POST http://localhost:3000/auth/register-operator
-Authorization: Bearer {{EMPRESA_TOKEN}}
 Content-Type: application/json
 
 {
@@ -700,17 +817,55 @@ Content-Type: application/json
   "last_name": "García",
   "address": "Calle 50 #10-20",
   "phone": "3009876543",
-  "country": "CO"
+  "country": "CO",
+  "companyId": "{{company_id}}"
 }
 ```
 
-**Reemplazar:** `{{EMPRESA_TOKEN}}` con token de la empresa (paso 21)
+**Reemplazar:**
+
+- `{{company_id}}` con el ID de la empresa
+- Opcionalmente agregar `Authorization: Bearer {{EMPRESA_TOKEN}}` si quieres usar token en lugar de los datos en el body
+
+**Nota:** Este endpoint crea un operador vinculado a una empresa.
 
 ---
 
-## PARTE 6: GESTIÓN DE USUARIOS (ADMIN)
+### 27. EMPRESA: ACTUALIZAR DATOS
 
-### 23. PROMOVER A ADMINISTRADOR (Nuevo)
+```
+PUT http://localhost:3000/companies/user/{{company_user_id}}
+Content-Type: application/json
+
+{
+  "company_name": "TransExpress S.A.S",
+  "industry": "Logística y Transporte",
+  "contact_name": "Carlos Mendoza Actualizado",
+  "address": "Carrera 7 #45-100, Bogotá",
+  "phone": "3001234567",
+  "country": "CO",
+  "plan": "pro"
+}
+```
+
+**Nota:** Todos los campos son opcionales
+
+---
+
+### 28. EMPRESA: SUBIR IMAGEN/LOGO
+
+```
+PUT http://localhost:3000/companies/user/{{company_user_id}}/image
+Content-Type: multipart/form-data
+
+image: [selecciona un archivo JPG/PNG]
+```
+
+---
+
+## PARTE 8: GESTIÓN DE USUARIOS (ADMIN)
+
+### 29. PROMOVER A ADMINISTRADOR
 
 ```
 PUT http://localhost:3000/users/{{user_id}}/role-admin
@@ -718,7 +873,7 @@ PUT http://localhost:3000/users/{{user_id}}/role-admin
 
 ---
 
-### 24. OBTENER TODOS LOS USUARIOS
+### 30. OBTENER TODOS LOS USUARIOS
 
 ```
 GET http://localhost:3000/users?page=1&limit=10
@@ -726,7 +881,15 @@ GET http://localhost:3000/users?page=1&limit=10
 
 ---
 
-### 25. ELIMINAR USUARIO (BORRADO LÓGICO)
+### 31. OBTENER UN USUARIO ESPECÍFICO
+
+```
+GET http://localhost:3000/users/{{user_id}}
+```
+
+---
+
+### 32. ELIMINAR USUARIO (BORRADO LÓGICO)
 
 ```
 DELETE http://localhost:3000/users/{{user_id}}
@@ -734,7 +897,7 @@ DELETE http://localhost:3000/users/{{user_id}}
 
 ---
 
-### 26. CAMBIAR ESTADO DE USUARIO
+### 33. CAMBIAR ESTADO DE USUARIO
 
 ```
 PUT http://localhost:3000/users/{{user_id}}/status
@@ -989,4 +1152,4 @@ redis-server
 
 ---
 
-**Última actualización:** 25 de abril de 2026
+**Última actualización:** 28 de abril de 2026
