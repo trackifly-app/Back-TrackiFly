@@ -128,6 +128,7 @@ export class OrdersRepository extends Repository<Order> {
       id: order.id,
       tracking_code: order.tracking_code,
       status: order.status,
+      preference_id: order.preference_id,
       pickup_direction: order.pickup_direction,
       delivery_direction: order.delivery_direction,
       distance: order.distance,
