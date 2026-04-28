@@ -27,6 +27,7 @@ import { CategoriesService } from "./categories/categories.service";
 
 import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 import { PaymentsModule } from "./payments/payments.module";
+import { ReportsModule } from "./reports/reports.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
@@ -57,6 +58,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
     CategoriesModule,
     CloudinaryModule,
     PaymentsModule,
+    ReportsModule,
     NotificationsModule,
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
