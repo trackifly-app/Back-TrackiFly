@@ -2,6 +2,7 @@ import { RegisterBaseDto } from './register-base.dto';
 import {
   IsNotEmpty,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -36,4 +37,8 @@ export class RegisterOperatorDto extends RegisterBaseDto {
   @MinLength(2, { message: 'El país debe tener al menos 2 caracteres' })
   @MaxLength(2, { message: 'El país no puede tener más de 2 caracteres (ISO 3166-1)' })
   country: string;
+
+  @IsNotEmpty({ message: 'El ID de la empresa no puede estar vacío' })
+  @IsUUID('4', { message: 'El ID de la empresa debe ser un UUID válido' })
+  companyId: string;
 }
