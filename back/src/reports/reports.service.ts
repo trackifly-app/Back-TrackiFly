@@ -64,24 +64,24 @@ export class ReportsService {
 
     // Procesar órdenes del período actual
     const orders = {
-      delivered: currentOrders.filter((o) => o.status === OrderStatus.Delivered)
+      delivered: currentOrders.filter((o) => o.status === OrderStatus.Completed)
         .length,
-      started: currentOrders.filter((o) => o.status === OrderStatus.Started)
+      started: currentOrders.filter((o) => o.status === OrderStatus.Shipped)
         .length,
-      canceled: currentOrders.filter((o) => o.status === OrderStatus.Canceled)
+      canceled: currentOrders.filter((o) => o.status === OrderStatus.Cancelled)
         .length,
     };
 
     // Procesar órdenes del período anterior
     const previousOrders = {
       delivered: previousOrdersList.filter(
-        (o) => o.status === OrderStatus.Delivered,
+        (o) => o.status === OrderStatus.Completed,
       ).length,
       started: previousOrdersList.filter(
-        (o) => o.status === OrderStatus.Started,
+        (o) => o.status === OrderStatus.Shipped,
       ).length,
       canceled: previousOrdersList.filter(
-        (o) => o.status === OrderStatus.Canceled,
+        (o) => o.status === OrderStatus.Cancelled,
       ).length,
     };
 
