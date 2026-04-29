@@ -26,6 +26,12 @@ export class PaymentsController {
       });
     }
 
+    // Formato query params con topic=merchant_order
+  // MP manda el merchant_order_id, hay que buscar el payment dentro
+  if (topic === 'merchant_order' && queryId) {
+    return this.paymentsService.handleMerchantOrder(queryId);
+  }
+
     return this.paymentsService.handleWebhook(
       body as { type: string; data?: { id: string } }
     );
