@@ -140,4 +140,45 @@ export class PaymentsService {
 
     return { received: true };
   }
+
+  async handleMerchantOrder(merchantOrderId: string) {
+  try {
+    // Buscamos el merchant order en MP para obtener los payments asociados
+    const response = await fetch(
+      `https://api.mercadopago.com/merchant_orders/${merchantOrderId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${environment.MP_ACCESS_TOKEN}`,
+        },
+      }
+    );
+
+    const merchantOrder = await response.json();
+    console.log('Merchant order recibida:', JSON.stringify(merchantOrder, null, 2));
+
+    const preferenceId = merchantOrder.preference_id;
+    if (!preferenceId) return { received: true };
+
+    // Verificar si algún pago está aprobado
+    const payments = merchantOrder.payments || [];
+    const approvedPayment = payments.find(
+      (p: any) => p.status === 'approved'
+    );
+
+    if (!approvedPayment) return { received: true };
+
+    const order = await this.ordersRepository.findOrderByPreferenceId(preferenceId);
+    console.log('Orden encontrada por merchant order:', order);
+
+    if (!order) return { received: true };
+
+    await this.ordersService.confirmPayment(order.id);
+    console.log(`Orden ${order.id} pagada via merchant_order`);
+
+    return { received: true };
+  } catch (error) {
+    console.error('Error procesando merchant order:', error);
+    return { received: true };
+  }
+}
 }
