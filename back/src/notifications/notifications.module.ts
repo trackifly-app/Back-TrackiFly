@@ -29,7 +29,15 @@ import { NotificationListenerService } from './listeners/notification-listener.s
       transport: {
         host: environment.SMTP_HOST,
         port: environment.SMTP_PORT,
-        secure: true, // SSL para puerto 465
+        secure: true,
+        ignoreTLS: false,
+        requireTLS: true,
+        // Forzar IPv4 debido a problemas de conectividad IPv6 en Railway
+        tls: { rejectUnauthorized: false },
+        pool: true,
+        maxConnections: 1,
+        maxMessages: 10,
+        ...({ family: 4 } as any),
         auth: {
           user: environment.SMTP_USER,
           pass: environment.SMTP_PASS,
