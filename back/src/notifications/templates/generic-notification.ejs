@@ -26,14 +26,14 @@
           
           <!-- Header -->
           <tr>
-            <td style="background:<%= colors.gradient %>;padding:32px 40px;text-align:center;">
+            <td style="background:<%= colors.gradient %>;padding:24px 20px;text-align:center;">
               <img
-                src="https://res.cloudinary.com/demo/image/upload/v1/trackilfy-logo-placeholder.png"
+                src="https://res.cloudinary.com/dkmqkhlhf/image/upload/v1777503147/WhatsApp_Image_2026-04-29_at_17.48.17-removebg-preview_rbyknf_ntasto.png"
                 alt="TrackiFly"
-                width="160"
-                style="display:inline-block;"
+                height="50"
+                style="display:block; margin: 0 auto 8px auto; max-height:50px; width:auto; object-fit:contain;"
               />
-              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;font-weight:600;letter-spacing:-0.5px;">
+              <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:600;letter-spacing:-0.5px;">
                 <%= title %>
               </h1>
             </td>
@@ -46,22 +46,7 @@
                 <%= message %>
               </p>
 
-              <% if (typeof actionUrl !== 'undefined' && actionUrl) { %>
-                <!-- Botón de acción -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td align="center" style="padding:8px 0 24px;">
-                      <a
-                        href="<%= actionUrl %>"
-                        target="_blank"
-                        style="display:inline-block;background-color:<%= colors.accent %>;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;padding:14px 32px;border-radius:8px;"
-                      >
-                        <%= typeof actionLabel !== 'undefined' && actionLabel ? actionLabel : 'Ver más' %>
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              <% } %>
+
             </td>
           </tr>
 
