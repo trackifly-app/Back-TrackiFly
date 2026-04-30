@@ -10,9 +10,9 @@ import { environment } from '../../config/environment';
  *
  * Soporta dos estrategias de envío:
  * - SMTP (vía @nestjs-modules/mailer) → para desarrollo local
- * - Resend HTTP API → para producción en Railway (donde SMTP está bloqueado)
+ * - Brevo HTTP API → para producción en Railway (donde SMTP está bloqueado)
  *
- * La estrategia se selecciona automáticamente según la variable RESEND_API_KEY.
+ * La estrategia se selecciona automáticamente según la variable BREVO_API_KEY.
  *
  * NO conoce la lógica de OTP, usuarios ni eventos.
  * Otros servicios le indican qué enviar.
@@ -20,14 +20,12 @@ import { environment } from '../../config/environment';
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private readonly resendApiKey = environment.RESEND_API_KEY;
-  private readonly smtpFrom =
-    environment.SMTP_FROM || 'TrackiFly <onboarding@resend.dev>';
+  private readonly brevoApiKey = environment.BREVO_API_KEY;
   private readonly templatesDir = join(__dirname, '..', 'templates');
 
   constructor(private readonly mailerService: MailerService) {
-    if (this.resendApiKey) {
-      this.logger.log('📧 Modo de envío: Resend HTTP API');
+    if (this.brevoApiKey) {
+      this.logger.log('📧 Modo de envío: Brevo HTTP API');
     } else {
       this.logger.log('📧 Modo de envío: SMTP directo');
     }
@@ -35,7 +33,7 @@ export class MailService {
 
   /**
    * Envía un correo electrónico usando un template EJS.
-   * Selecciona automáticamente SMTP o Resend según la configuración.
+   * Selecciona automáticamente SMTP o Brevo según la configuración.
    *
    * @param to - Dirección de email del destinatario
    * @param subject - Asunto del correo
@@ -49,8 +47,8 @@ export class MailService {
     context: Record<string, unknown>,
   ): Promise<void> {
     try {
-      if (this.resendApiKey) {
-        await this.sendViaResend(to, subject, template, context);
+      if (this.brevoApiKey) {
+        await this.sendViaBrevo(to, subject, template, context);
       } else {
         await this.mailerService.sendMail({ to, subject, template, context });
       }
@@ -68,10 +66,10 @@ export class MailService {
   }
 
   /**
-   * Envía el email a través de la API HTTP de Resend.
+   * Envía el email a través de la API HTTP de Brevo (Sendinblue).
    * Renderiza el template EJS a HTML y lo envía vía fetch (puerto 443, nunca bloqueado).
    */
-  private async sendViaResend(
+  private async sendViaBrevo(
     to: string,
     subject: string,
     template: string,
@@ -81,23 +79,27 @@ export class MailService {
     const templatePath = join(this.templatesDir, `${template}.ejs`);
     const html = await ejs.renderFile(templatePath, context);
 
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.resendApiKey}`,
+        'api-key': this.brevoApiKey as string,
+        accept: 'application/json',
       },
       body: JSON.stringify({
-        from: this.smtpFrom,
-        to: [to],
+        sender: {
+          name: 'TrackiFly',
+          email: environment.SMTP_USER || 'trackifly.app@gmail.com',
+        },
+        to: [{ email: to }],
         subject,
-        html,
+        htmlContent: html,
       }),
     });
-
+.
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Resend API error (${response.status}): ${errorBody}`);
+      throw new Error(`Brevo API error (${response.status}): ${errorBody}`);
     }
   }
 

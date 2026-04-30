@@ -32,6 +32,6 @@ export const environment = {
   // OTP / Notificaciones
   AUTH_SECRET: process.env.AUTH_SECRET,
 
-  // Resend (Estrategia HTTP para Railway)
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  // Brevo (Estrategia HTTP para Railway sin dominio propio)
+  BREVO_API_KEY: process.env.BREVO_API_KEY,
 };
